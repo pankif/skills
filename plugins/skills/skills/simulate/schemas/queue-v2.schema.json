@@ -1,0 +1,180 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:simulate:queue:v2",
+  "title": "simulate scenario queue v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "analysis_version",
+    "spec_sha256",
+    "analysis_sha256",
+    "mode",
+    "focus",
+    "scenario_cap",
+    "iteration",
+    "status",
+    "stop_reason",
+    "next_counter",
+    "pending",
+    "in_progress",
+    "done",
+    "failed"
+  ],
+  "properties": {
+    "schema_version": {"const": 2},
+    "analysis_version": {"const": "simulate-analysis/v2"},
+    "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "analysis_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "mode": {"enum": ["targeted", "standard", "deep", "attacks-only"]},
+    "focus": {"type": ["string", "null"]},
+    "scenario_cap": {"type": "integer", "minimum": 1, "maximum": 20},
+    "iteration": {"type": "integer", "minimum": 0},
+    "status": {"enum": ["active", "complete", "halted"]},
+    "stop_reason": {
+      "type": ["string", "null"],
+      "enum": [
+        null,
+        "scenario inventory exhausted",
+        "mode scenario cap reached",
+        "focus inventory exhausted",
+        "no progress",
+        "hard error"
+      ]
+    },
+    "next_counter": {"type": "integer", "minimum": 1},
+    "pending": {"$ref": "#/$defs/pending_array"},
+    "in_progress": {"$ref": "#/$defs/in_progress_array"},
+    "done": {"$ref": "#/$defs/done_array"},
+    "failed": {"$ref": "#/$defs/failed_array"}
+  },
+  "$defs": {
+    "pending_array": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/scenario"},
+          {
+            "properties": {
+              "attempts": {"const": 0},
+              "last_error": {"type": "null"},
+              "artifact_path": {"type": "null"},
+              "artifact_sha256": {"type": "null"}
+            }
+          }
+        ]
+      }
+    },
+    "in_progress_array": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/scenario"},
+          {
+            "properties": {
+              "attempts": {"type": "integer", "minimum": 1},
+              "last_error": {"type": "null"},
+              "artifact_path": {
+                "type": "string",
+                "pattern": "^sim-[0-9]{3,}-[a-z0-9]+(?:-[a-z0-9]+)*\\.md$"
+              },
+              "artifact_sha256": {"type": "null"}
+            }
+          }
+        ]
+      }
+    },
+    "done_array": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/scenario"},
+          {
+            "properties": {
+              "attempts": {"type": "integer", "minimum": 1},
+              "last_error": {"type": "null"},
+              "artifact_path": {
+                "type": "string",
+                "pattern": "^sim-[0-9]{3,}-[a-z0-9]+(?:-[a-z0-9]+)*\\.md$"
+              },
+              "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+            }
+          }
+        ]
+      }
+    },
+    "failed_array": {
+      "type": "array",
+      "items": {
+        "allOf": [
+          {"$ref": "#/$defs/scenario"},
+          {
+            "properties": {
+              "attempts": {"type": "integer", "minimum": 1},
+              "last_error": {"type": "string", "minLength": 1},
+              "artifact_path": {
+                "type": "string",
+                "pattern": "^sim-[0-9]{3,}-[a-z0-9]+(?:-[a-z0-9]+)*\\.md$"
+              },
+              "artifact_sha256": {"type": "null"}
+            }
+          }
+        ]
+      }
+    },
+    "scenario": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slug",
+        "category",
+        "title",
+        "brief",
+        "priority",
+        "actors_involved",
+        "transitions_targeted",
+        "invariants_targeted",
+        "attempts",
+        "last_error",
+        "artifact_path",
+        "artifact_sha256"
+      ],
+      "properties": {
+        "id": {"type": "string", "pattern": "^[GEAF][0-9]{2,3}$"},
+        "slug": {"type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+        "category": {"enum": ["golden", "edge", "attack"]},
+        "title": {"type": "string", "minLength": 1},
+        "brief": {"type": "string", "minLength": 1},
+        "priority": {"type": "integer", "minimum": 1, "maximum": 3},
+        "actors_involved": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "transitions_targeted": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^T[0-9]{2,3}$"}
+        },
+        "invariants_targeted": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^I[0-9]{2,3}$"}
+        },
+        "attempts": {"type": "integer", "minimum": 0},
+        "last_error": {"type": ["string", "null"]},
+        "artifact_path": {
+          "type": ["string", "null"],
+          "pattern": "^sim-[0-9]{3,}-[a-z0-9]+(?:-[a-z0-9]+)*\\.md$"
+        },
+        "artifact_sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

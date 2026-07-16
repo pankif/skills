@@ -1,0 +1,36 @@
+{
+  "name": "skills",
+  "version": "0.6.0",
+  "description": "Portable, verification-aware workflows for autonomous building, specification, simulation, diagnosis, and sketching.",
+  "author": {
+    "name": "pankif",
+    "url": "https://github.com/pankif"
+  },
+  "homepage": "https://github.com/pankif/skills",
+  "repository": "https://github.com/pankif/skills",
+  "keywords": [
+    "agent-skills",
+    "coding-agents",
+    "specification",
+    "debugging",
+    "simulation"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Pankif Skills",
+    "shortDescription": "Portable build, spec, simulation, and diagnosis workflows",
+    "longDescription": "A portable collection of practical-by-default AI coding workflows with strict modes, honest verification states, and deterministic artifact validators.",
+    "developerName": "pankif",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write"
+    ],
+    "websiteURL": "https://github.com/pankif/skills",
+    "defaultPrompt": [
+      "Turn this product idea into an implementable specification.",
+      "Stress-test this specification before implementation.",
+      "Diagnose this failure without guessing the root cause."
+    ]
+  }
+}

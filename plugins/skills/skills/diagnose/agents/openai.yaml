@@ -1,0 +1,6 @@
+interface:
+  display_name: "Diagnose"
+  short_description: "Evidence-driven root-cause investigation"
+  default_prompt: "Use $diagnose to investigate this defect and state the evidence strength."
+policy:
+  allow_implicit_invocation: true

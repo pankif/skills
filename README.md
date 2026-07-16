@@ -1,83 +1,120 @@
-# skills
+# Pankif Skills
 
-My custom skills for AI coding agents.
+Portable workflows for AI coding agents. The repository currently ships four
+workflow skills for Claude Code and Codex from one shared source:
 
-Each skill is a self-contained directory with a `SKILL.md` (the entry point the agent
-loads) plus optional `references/` (docs loaded on demand) and `evals/` (test
-prompts). They are hand-built, iterated against real evals, and kept here as the
-source of truth — separate from the live install location.
+| Skill | Use it for | Default posture |
+| --- | --- | --- |
+| [`autopilot`](plugins/skills/skills/autopilot/) | Drive a substantial feature from intent to verified local work | `build --standard` |
+| [`spec`](plugins/skills/skills/spec/) | Turn an ambiguous product idea into an implementable spec | `quick` interview |
+| [`simulate`](plugins/skills/skills/simulate/) | Stress-test a spec before implementation | `standard` scenarios |
+| [`diagnose`](plugins/skills/skills/diagnose/) | Investigate defects and incidents without guessing a cause | `quick` diagnosis |
 
-The skill format and the `~/.claude/skills/` install path below are
-[Claude Code](https://claude.com/claude-code)'s, but the skills themselves are written
-to be agent- and stack-agnostic in spirit.
+`sketch` remains available as an experimental workflow, but it is not part of
+the portability and validator redesign in this release.
 
-## What goes here
+## Design principles
 
-Skills that are **general-purpose and reusable across projects** — not tied to one
-codebase. Project-specific skills live with their project; portable ones live here.
+- One canonical `SKILL.md` per workflow; Claude Code and Codex load the same
+  instructions.
+- Thin platform metadata only. Platform adapters do not fork the workflow.
+- Practical defaults with explicit `deep` or `strict` modes for high-blast work.
+- Missing platform capabilities cause a documented fallback and a weaker claim,
+  never a silently skipped step.
+- Structural validators prove structure only. They do not claim that an LLM's
+  conclusions, classifications, or causal arguments are true.
+- Remote writes require current, explicit user authority. A mode name is not
+  permission to push, open a PR, merge, deploy, publish, or apply infrastructure.
+
+The shared capability and verification contracts are documented in
+[`docs/runtime-compatibility.md`](docs/runtime-compatibility.md). Evaluation
+rules live in [`docs/evaluation.md`](docs/evaluation.md).
 
 ## Install
 
-**This repo *is* the marketplace.** There's nothing to upload anywhere — a Claude Code
-"marketplace" is just a git repo with a `.claude-plugin/marketplace.json`. Pushing to
-GitHub is publishing; installing means pointing Claude Code at this repo.
+### Claude Code
 
-### As a plugin (recommended)
-
-```
-/plugin marketplace add JeanIsahakyan/skills
-/plugin install skills@jeanisahakyan
+```text
+/plugin marketplace add pankif/skills
+/plugin install skills@pankif
 ```
 
-First line registers this repo as a marketplace (Claude Code clones it and reads
-`.claude-plugin/marketplace.json`); second installs the `skills` plugin from it — which
-bundles every skill under `plugin/skills/`. After the marketplace is added you can also
-just run `/plugin install skills`. Pull updates with `/plugin marketplace update jeanisahakyan`.
+Update later with:
 
-> The `skills@jeanisahakyan` form is `<plugin-name>@<marketplace-name>` — `skills` is the
-> plugin (`plugin/.claude-plugin/plugin.json`), `jeanisahakyan` is the marketplace
-> (`.claude-plugin/marketplace.json` → `name`). They're separate names by design, not the
-> `owner/repo` GitHub path.
+```text
+/plugin marketplace update pankif
+```
 
-### Manually (single skill, no plugin system)
-
-Copy (or symlink) one skill directory into your agent's skills folder
-(`~/.claude/skills/` for Claude Code):
+### Codex
 
 ```bash
-cp -r plugin/skills/autopilot ~/.claude/skills/autopilot
-# or, to keep it in sync with this repo:
-ln -s "$(pwd)/plugin/skills/autopilot" ~/.claude/skills/autopilot
+codex plugin marketplace add pankif/skills
+codex plugin add skills@pankif-skills
 ```
 
-The agent picks it up automatically; the skill's `description` decides when it
-triggers.
+Restart Codex or open a new task after installation so the new skill metadata is
+loaded. The repository also contains native Codex metadata in
+`.agents/plugins/marketplace.json`, `plugins/skills/.codex-plugin/plugin.json`, and each
+skill's `agents/openai.yaml`.
 
-## Skills
+### Manual single-skill install
 
-| Skill | What it does |
-|-------|--------------|
-| [`autopilot`](plugin/skills/autopilot/) | Universal autonomous feature/project builder — turns ~one prompt into a whole working, tested feature without asking questions, refusing to build the wrong/redundant thing up front (premise gate) and surfacing the irreversible decisions + honest verification claims at the end. Validated against evals (see the skill's `evals/`). |
-| [`spec`](plugin/skills/spec/) | Turn a fuzzy product idea into a precise **SPEC.md / PRD before any code** — by interviewing you with plain-language *product* questions only and deriving every technical decision from the existing codebase (never asking a tech question). Output is one file with a hard wall: narrative product behaviour on top, a derived technical appendix sealed at the bottom. Runs codebase-context → product-interview loop → spec-writer. Pairs naturally with `simulate` (spec it → simulate it). Generalized from a production feature pipeline's spec stage. |
-| [`sketch`](plugin/skills/sketch/) | Iterate a UI/UX surface with a human at the highest fidelity the target can **honestly** afford, and climb from a quick sketch up to a runnable prototype — all in one loop that only locks on the literal word `accept`. Medium- and stack-agnostic: a screen (web/iOS/desktop), a terminal UI, a spatial/VR scene, or a voice/audio flow — the medium, stack, and reachable tooling are discovered at runtime (no per-platform code). Climbs a fidelity ladder (text sketch → static still → live preview → real run) only as far as the tooling truly reaches, and degrades honestly (never fakes a rung; hands off the exact command when a device/headset is needed). Unifies + generalizes a production pipeline's UI accept-loop **and** prototype stage. |
-| [`simulate`](plugin/skills/simulate/) | Stress-test a spec / design doc **before** writing code by mentally executing it as every component at once — data stores, services, clients, external systems — running golden / edge / adversarial scenarios with explicit state diffs, looped autonomously (spec-analyzer → parallel simulators → findings-aggregator) until findings settle to LOW. Produces a deduped, severity-ranked `FINDINGS.md`. Generalized from a production feature pipeline's spec-simulation stage. |
-| [`diagnose`](plugin/skills/diagnose/) | Backward root-cause debugging — the inverse of the build skills: start from a defect (failing test, crash, wrong output, **flaky** failure, perf regression, prod log) and work to a **proven** cause, never a guessed one. Refuses to name a cause until it reproduces → vanishes under an *isolated* control → returns on revert; kills hypotheses only by evidence that forbids them; a Phase-0 oracle check asks "is this even a bug, or is the expectation wrong?" first. Stops at cause-proven + a mechanism-impossible fix **proposed** + handoff (it doesn't build the fix). Stack-agnostic via runtime discovery (instrument-blindness + achievable-control-surface aware); on a dead end it emits a *narrowed space + armed trap*, never a confident guess. |
+Copy one directory from `plugins/skills/skills/` into a supported skills directory.
 
-## Adding a skill
+```bash
+# Claude Code
+cp -R plugins/skills/skills/spec ~/.claude/skills/spec
 
-This is a growing collection — new skills land over time. To add one:
+# Codex user scope
+cp -R plugins/skills/skills/spec ~/.agents/skills/spec
+```
 
-1. Create `plugin/skills/<name>/SKILL.md` (plus optional `references/` and `evals/`).
-2. Append a row to the **Skills** table above.
-3. Commit and push.
+On Windows, use `Copy-Item -Recurse` and the equivalent directory under your
+user profile. No symlink or shell-specific behavior is required by the skills.
 
-That's it. Skills are auto-discovered under `plugin/skills/`, so they ship in the
-`skills` plugin automatically — **no `.claude-plugin/` manifest edits per skill.** The
-README table is the single living list of what's here. Bump `version` in
-`plugin/.claude-plugin/plugin.json` when you want a release marker for
-`/plugin marketplace update`.
+## Development
 
-## Notes
+Run the repository checks with Python 3.9 or newer; all scripts use only the
+standard library. Use the Python 3 launcher available on the host (`python`,
+`python3`, or `py -3` on Windows).
 
-Skills here are developed and maintained primarily through AI assistance — see
-[`CLAUDE.md`](CLAUDE.md) for how that work is calibrated.
+```bash
+python scripts/validate_repository.py
+```
+
+The check validates frontmatter constraints, manifests, JSON/schema fixtures,
+local paths referenced directly from each `SKILL.md`, and each skill's
+deterministic artifact validator. It does not replace paired behavioral
+evaluation.
+
+When changing a skill:
+
+1. Keep `SKILL.md` focused and move detailed protocols into `references/`.
+2. Add trigger and non-trigger cases to its public eval catalog.
+3. Add positive and negative fixtures for deterministic validators.
+4. Run the repository validator on the target platforms.
+5. Record behavioral runs separately for Claude Code and Codex; do not call a
+   structural pass a behavioral improvement.
+
+## Repository layout
+
+```text
+.agents/plugins/marketplace.json   Codex marketplace metadata
+.claude-plugin/marketplace.json    Claude Code marketplace metadata
+plugins/skills/
+  .codex-plugin/plugin.json        Codex plugin manifest
+  .claude-plugin/plugin.json       Claude Code plugin manifest
+  skills/<name>/
+    SKILL.md                        canonical portable workflow
+    agents/openai.yaml              Codex UI/invocation metadata
+    agents/*.md                     portable role prompts, when needed
+    references/                     progressive-disclosure guidance
+    schemas/                        versioned artifact schemas
+    scripts/                        deterministic validators
+    fixtures/                       validator examples
+    evals/evals.json                public behavioral cases
+scripts/validate_repository.py      repository-wide structural check
+evals/result.schema.json            paired behavioral result format
+```
+
+This fork is maintained at <https://github.com/pankif/skills>.

@@ -1,14 +1,14 @@
 {
-  "name": "jeanisahakyan",
-  "description": "Zhan Isaakian's personal marketplace of custom AI-agent skills — a growing collection, hand-built and distilled from battle-tested production pipelines + adversarial design.",
+  "name": "pankif",
+  "description": "Portable, verification-aware workflows for AI coding agents.",
   "owner": {
-    "name": "Zhan Isaakian"
+    "name": "pankif"
   },
   "plugins": [
     {
       "name": "skills",
-      "source": "./plugin",
-      "description": "Zhan Isaakian's growing collection of custom AI-agent skills (each hand-built; distilled from battle-tested production pipelines and/or adversarial design). See the repo README for the current list."
+      "source": "./plugins/skills",
+      "description": "Autopilot, specification, simulation, diagnosis, and sketch workflows for Claude Code and Codex."
     }
   ]
 }

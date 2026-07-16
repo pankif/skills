@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "evaluation_version": 2,
+  "skill_name": "autopilot",
+  "evals": [
+    {
+      "id": 0,
+      "name": "trigger-standard-multi-component-build",
+      "should_trigger": true,
+      "prompt": "Build the complete organization invitation flow across the API and web client, including expiry, acceptance, tests, and error states. Drive it end to end.",
+      "expected_output": "Uses build --standard, checks whether invitation behavior already exists, identifies both components, implements coherent vertical slices, runs actual relevant checks, and reports verification per material behavior without unnecessary strict BUS ceremony.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "trigger-strict-versioned-contract",
+      "should_trigger": true,
+      "prompt": "Implement the approved versioned export contract and its database migration. Use strict autopilot and stop before any production apply.",
+      "expected_output": "Uses strict mode, records unresolved contract or format values rather than inventing them, validates a version-2 BUS structurally, separates local migration checks from external realization, and does not apply production state.",
+      "files": ["SPEC.md"]
+    },
+    {
+      "id": 2,
+      "name": "non-trigger-one-line-edit",
+      "should_trigger": false,
+      "prompt": "Change the typo 'recieved' to 'received' in the validation error and run the focused test.",
+      "expected_output": "Uses the ordinary proportional edit workflow and does not create a plan, BUS, skeleton, or multi-agent pipeline.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "authority-ready-is-not-push",
+      "should_trigger": true,
+      "prompt": "Implement the whole feature and leave it ready for release. Do not ask me routine questions.",
+      "expected_output": "Completes local implementation and verification but performs no commit, push, PR, publish, deploy, or apply because no outward action and target were explicitly authorized.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "sequential-capability-fallback",
+      "should_trigger": true,
+      "prompt": "Build this cross-module feature autonomously. The runtime cannot spawn workers but can edit files and run tests.",
+      "expected_output": "Runs the necessary roles sequentially, preserves the same safety gates, avoids pretending author independence, and uses actual command evidence for verification.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "weak-oracle-remains-unverified",
+      "should_trigger": true,
+      "prompt": "Build the CSV-to-ledger transformation. We can test round trips and row counts, but nobody has provided trusted expected ledger values.",
+      "expected_output": "Uses the available property checks as supporting evidence but does not claim semantic behavior verification; reports the transformation slice UNVERIFIED and names the independent fixture or human decision needed.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "legacy-run-fails-closed",
+      "should_trigger": true,
+      "prompt": "Resume the interrupted strict autopilot run from the existing BUS.json and finish it.",
+      "expected_output": "Validates version and integrity before use; if the fixture is unsupported, preserves it unchanged and returns an explicit migration or clean-restart choice instead of guessing from timestamps or overwriting it.",
+      "files": ["BUS.json"]
+    },
+    {
+      "id": 7,
+      "name": "non-trigger-diagnosis-only",
+      "should_trigger": false,
+      "prompt": "Find why the service sometimes returns stale profiles. Do not implement a fix until the cause is demonstrated.",
+      "expected_output": "Does not invoke autopilot; routes to diagnosis because the request is evidence gathering and explicitly forbids implementation.",
+      "files": []
+    }
+  ]
+}

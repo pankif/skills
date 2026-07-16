@@ -1,0 +1,7 @@
+interface:
+  display_name: "Simulate"
+  short_description: "Stress-test stateful specs before implementation"
+  default_prompt: "Use $simulate in standard mode to stress-test this design before implementation and report unresolved state, concurrency, and failure gaps."
+
+policy:
+  allow_implicit_invocation: true

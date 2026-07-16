@@ -1,0 +1,33 @@
+{
+  "schema_version": 2,
+  "analysis_version": "simulate-analysis/v2",
+  "spec_sha256": "ec08dbd491889690596c6f5219200dc5bce8c087e3b576467eb08c890eaef7a3",
+  "analysis_sha256": "865a40e535b8dfae0ca4078765be2c80f0479070199b8f21c8a78b81c1256af7",
+  "mode": "standard",
+  "focus": null,
+  "scenario_cap": 12,
+  "iteration": 0,
+  "status": "active",
+  "stop_reason": null,
+  "next_counter": 1,
+  "pending": [
+    {
+      "id": "A01",
+      "slug": "concurrent-payment",
+      "category": "attack",
+      "title": "Concurrent payment",
+      "brief": "Two payment attempts race the single transition.",
+      "priority": 4,
+      "actors_involved": ["SERVICE", "STORE"],
+      "transitions_targeted": ["T01"],
+      "invariants_targeted": ["I01"],
+      "attempts": 0,
+      "last_error": null,
+      "artifact_path": null,
+      "artifact_sha256": null
+    }
+  ],
+  "in_progress": [],
+  "done": [],
+  "failed": []
+}

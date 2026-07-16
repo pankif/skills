@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pankif/skills/evals/result-v1.schema.json",
+  "title": "Paired skill evaluation result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evaluation_version",
+    "skill_name",
+    "case_name",
+    "platform",
+    "arm",
+    "fixture_commit",
+    "model_class",
+    "tool_profile",
+    "sandbox_profile",
+    "network_profile",
+    "budget",
+    "result_label",
+    "observable_outcomes"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "evaluation_version": { "type": "integer", "minimum": 1 },
+    "skill_name": { "enum": ["autopilot", "spec", "simulate", "diagnose"] },
+    "case_name": { "type": "string", "minLength": 1 },
+    "platform": { "enum": ["claude-code", "codex"] },
+    "arm": { "enum": ["baseline", "skill"] },
+    "fixture_commit": { "type": "string", "minLength": 1 },
+    "model_class": { "type": "string", "minLength": 1 },
+    "tool_profile": { "type": "string", "minLength": 1 },
+    "sandbox_profile": { "type": "string", "minLength": 1 },
+    "network_profile": { "type": "string", "minLength": 1 },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["turns", "time_seconds"],
+      "properties": {
+        "turns": { "type": ["integer", "null"], "minimum": 1 },
+        "time_seconds": { "type": ["integer", "null"], "minimum": 1 },
+        "tokens": { "type": ["integer", "null"], "minimum": 1 }
+      }
+    },
+    "result_label": {
+      "enum": [
+        "not-run",
+        "invalid-run",
+        "baseline-recorded",
+        "paired-recorded",
+        "behavior-pass",
+        "behavior-fail",
+        "human-review-needed"
+      ]
+    },
+    "observable_outcomes": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands", "changed_paths", "outward_effects", "final_claims"],
+      "properties": {
+        "commands": { "type": "array", "items": { "type": "string" } },
+        "changed_paths": { "type": "array", "items": { "type": "string" } },
+        "outward_effects": { "type": "array", "items": { "type": "string" } },
+        "final_claims": { "type": "array", "items": { "type": "string" } },
+        "questions_asked": { "type": "array", "items": { "type": "string" } },
+        "artifact_count": { "type": ["integer", "null"], "minimum": 0 },
+        "tool_call_count": { "type": ["integer", "null"], "minimum": 0 },
+        "runtime_seconds": { "type": ["number", "null"], "minimum": 0 },
+        "token_count": { "type": ["integer", "null"], "minimum": 0 },
+        "highest_verification_state": {
+          "type": ["string", "null"],
+          "enum": [
+            "designed",
+            "generated",
+            "syntax-validated",
+            "executed",
+            "behavior-verified",
+            "human-reviewed",
+            null
+          ]
+        }
+      }
+    },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

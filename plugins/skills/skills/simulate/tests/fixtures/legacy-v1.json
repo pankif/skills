@@ -1,0 +1,19 @@
+{
+  "slug": "fixture",
+  "version": 1,
+  "next_counter": 2,
+  "pending": [
+    {
+      "id": "A1",
+      "slug": "legacy-replay",
+      "category": "attack",
+      "title": "Legacy replay",
+      "brief": "Legacy fixture for read-only recognition.",
+      "priority": 1,
+      "actors_involved": ["service", "store"],
+      "invariants_targeted": [1]
+    }
+  ],
+  "in_progress": [],
+  "done": []
+}

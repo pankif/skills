@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "evaluation_version": 2,
+  "skill_name": "diagnose",
+  "evals": [
+    {
+      "id": 0,
+      "name": "quick-deterministic-regression",
+      "should_trigger": true,
+      "prompt": "Why did this deterministic API test start returning 409 instead of 200? Find the cause, but do not change code.",
+      "expected_output": "Routes to quick mode, pins the exact 409 signature, reproduces if possible, compares the leading mechanism with a credible rival, and reports evidence strength without creating strict CASE ceremony by default.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "strict-flaky-suite-failure",
+      "should_trigger": true,
+      "prompt": "Use strict diagnosis to prove why this test passes alone but fails intermittently in the full suite. Do not implement the fix.",
+      "expected_output": "Routes to strict mode, treats samples statistically, keeps multiple axes live, requires an isolated differential receipt plus a genuinely independent falsifier before CAUSE-CONFIRMED, and writes only a CASE ledger with supported schema_version and analysis_version.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "incident-without-safe-reproduction",
+      "should_trigger": true,
+      "prompt": "Production latency spiked for six minutes and recovered. We have logs and metrics but cannot replay traffic or restart anything. Diagnose the incident.",
+      "expected_output": "Routes to incident mode and returns proven facts, explicitly unproven ranked hypotheses, reversible safe mitigation, and the smallest missing evidence; it ends INCIDENT-ASSESSMENT without claiming a root cause or demanding unsafe reproduction.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "weak-priors-do-not-stop",
+      "should_trigger": true,
+      "prompt": "A new regression test fails against behavior that has existed for two years and has an old comment calling it intentional. The approved API contract says the new expected result is required. Find why the implementation violates it.",
+      "expected_output": "Treats age and the intentional comment as weak priors, classifies the oracle trusted because the explicit approved contract supports it, and proceeds instead of terminating as specification-suspect.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "explicit-contract-contradicts-oracle",
+      "should_trigger": true,
+      "prompt": "A test expects HTTP 200 for duplicate creation, but the approved public API contract explicitly requires HTTP 409. Investigate the failing test.",
+      "expected_output": "Classifies the oracle contradicted-by-explicit-contract, quotes the exact contract conflict, and stops the current signature as ORACLE-CONTRADICTED without debugging compliant behavior.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "negative-obvious-import-error",
+      "should_trigger": false,
+      "prompt": "Fix the ModuleNotFoundError caused by the misspelled import on line 4; the correct module name is requests.",
+      "expected_output": "Does not invoke diagnose or create diagnostic artifacts; this is an obvious known-location, known-fix implementation task.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "negative-known-cause-fix",
+      "should_trigger": false,
+      "prompt": "We already confirmed the nil dereference is caused by missing validation in parseUser. Add the guard and regression test.",
+      "expected_output": "Does not invoke diagnose; the cause is already verified and the request is implementation of a known fix.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "strict-independent-falsifier-unavailable",
+      "should_trigger": true,
+      "prompt": "Run strict diagnosis. The differential control passed, but this environment cannot spawn a fresh subagent, thread, or isolated verifier. You may do a second pass yourself.",
+      "expected_output": "Uses a sequential pass only to narrow or refute, records the missing independent-falsifier capability, and returns NARROWED rather than CAUSE-CONFIRMED even if the same-agent attacks appear clean.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "name": "unsupported-analysis-version-resume",
+      "should_trigger": true,
+      "prompt": "Resume this strict diagnosis. Existing CASE.jsonl has schema_version 1 and analysis_version 2; keep using the file and append the next probe.",
+      "expected_output": "Fails closed because analysis_version 2 is unsupported, preserves the existing ledger without overwrite or append, and requires an explicitly reviewed migration or a named new path.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "name": "incident-capability-fallback",
+      "should_trigger": true,
+      "prompt": "Diagnose this production incident with read-only logs, metrics, and configuration. Profiler access and traffic replay are unavailable, and no production mutations are allowed.",
+      "expected_output": "Uses the remaining safe evidence instead of declaring BLOCKED merely because preferred capabilities are missing, names the gaps, and returns INCIDENT-ASSESSMENT with unproven ranked hypotheses and the next discriminator.",
+      "files": []
+    }
+  ]
+}

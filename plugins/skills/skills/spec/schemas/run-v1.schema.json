@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pankif/skills/spec/run-v1.schema.json",
+  "title": "Spec scratch run manifest v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "analysis_version",
+    "skill",
+    "slug",
+    "mode",
+    "intent",
+    "intent_sha256",
+    "created_at",
+    "source_identity"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 1 },
+    "analysis_version": { "const": "spec-run/v1" },
+    "skill": { "const": "spec" },
+    "slug": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "mode": { "enum": ["quick", "deep"] },
+    "intent": { "type": "string", "minLength": 1 },
+    "intent_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "created_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
+    },
+    "source_identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "root_name",
+        "remote_sha256",
+        "commit",
+        "worktree_sha256",
+        "excluded_paths"
+      ],
+      "properties": {
+        "kind": { "enum": ["git", "directory"] },
+        "root_name": { "type": "string", "minLength": 1 },
+        "remote_sha256": {
+          "type": ["string", "null"],
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "commit": { "type": ["string", "null"], "minLength": 1 },
+        "worktree_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "excluded_paths": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

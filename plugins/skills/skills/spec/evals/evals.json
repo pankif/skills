@@ -1,0 +1,71 @@
+{
+  "schema_version": 1,
+  "evaluation_version": 2,
+  "skill_name": "spec",
+  "evals": [
+    {
+      "id": 0,
+      "name": "trigger-quick-shared-quiet-hours",
+      "should_trigger": true,
+      "prompt": "Let's spec a workspace quiet-hours feature before anyone codes it. I know owners choose the schedule, but the rest of the behavior is still fuzzy.",
+      "expected_output": "Uses quick mode, asks a bounded set of observable product questions, gathers repository evidence without treating it as product truth, and drafts a SPEC.md while keeping scratch notes under .planning by default.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "trigger-deep-export-approvals",
+      "should_trigger": true,
+      "prompt": "Use a deep spec process for organization data exports that require approval from two administrators. Formalize the lifecycle, failures, audit expectations, and recovery behavior before implementation.",
+      "expected_output": "Uses deep mode, covers multi-party state and operational guarantees in product language, inspects relevant producers, consumers, tests, and policies, and exposes conflicts or unknowns instead of inventing them.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "trigger-existing-repo-profile-switch",
+      "should_trigger": true,
+      "prompt": "Write a PRD for adding profile switching to this CLI. Follow the repository's established patterns, but call out anything that looks legacy or inconsistent rather than copying it blindly.",
+      "expected_output": "Creates a product-first spec, treats repository patterns as provenance-bearing evidence, records legacy signals and conflicts, and follows the repository's actual migration or rollback policy if one exists.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "non-trigger-direct-fix",
+      "should_trigger": false,
+      "prompt": "Fix the off-by-one error in paginate.py and add a regression test. The expected behavior is already described in the failing test.",
+      "expected_output": "Does not invoke spec; this is a direct, settled bug-fix request.",
+      "files": ["paginate.py"]
+    },
+    {
+      "id": 4,
+      "name": "non-trigger-code-explanation",
+      "should_trigger": false,
+      "prompt": "Explain what the reconcileSubscriptions function does and why it batches records in groups of 100.",
+      "expected_output": "Does not invoke spec; the user asked for code explanation, not product requirement discovery.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "non-trigger-incident-diagnosis",
+      "should_trigger": false,
+      "prompt": "Production jobs started timing out after yesterday's deploy. Diagnose the root cause from these logs and traces, but don't change code yet.",
+      "expected_output": "Does not invoke spec; routes to an incident or diagnosis workflow.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "trigger-unavailable-workers-and-python",
+      "should_trigger": true,
+      "prompt": "Write a quick product spec for team aliases before implementation. This environment cannot spawn workers and has no Python 3 launcher.",
+      "expected_output": "Executes the three capabilities sequentially in the current session, uses the manual structural checklist when automated validation is unavailable, and does not label the result syntax-validated or human-reviewed without the corresponding evidence.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "trigger-stale-legacy-scratch",
+      "should_trigger": true,
+      "prompt": "Resume the quick spec for shared inbox routing. The existing .planning/spec/shared-inbox directory contains old _context.md and _interview.md files copied from another repository, but no _run.json manifest.",
+      "expected_output": "Does not silently consume or overwrite the legacy notes, reports that resume is unsupported without a compatible versioned manifest and matching source identity, and asks the user to confirm restart or choose a new scratch path.",
+      "files": []
+    }
+  ]
+}

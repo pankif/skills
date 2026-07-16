@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/pankif/skills/autopilot/bus-v2.schema.json",
+  "title": "Autopilot strict decision bus v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "analysis_version",
+    "run_id",
+    "mode",
+    "depth",
+    "target",
+    "prompt_sha256",
+    "decisions",
+    "unfinished_markers",
+    "disclosure_decision_ids",
+    "outward_authority",
+    "integrity"
+  ],
+  "properties": {
+    "schema_version": { "type": "integer", "const": 2 },
+    "analysis_version": { "const": "autopilot-0.6" },
+    "run_id": { "type": "string", "minLength": 1 },
+    "mode": { "enum": ["plan", "build", "ship"] },
+    "depth": { "const": "strict" },
+    "target": { "type": "string", "minLength": 1 },
+    "prompt_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "decisions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/decision" }
+    },
+    "unfinished_markers": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "disclosure_decision_ids": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "outward_authority": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/authorityReceipt" }
+    },
+    "integrity": { "$ref": "#/$defs/integrity" }
+  },
+  "$defs": {
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "category",
+        "reach",
+        "disposition",
+        "statement",
+        "blast_rank",
+        "provenance"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "category": {
+          "enum": [
+            "public-contract",
+            "persistent-format",
+            "destructive",
+            "trust-boundary",
+            "outward-effect",
+            "real-world-mutation",
+            "internal"
+          ]
+        },
+        "reach": { "enum": ["local", "external", "unknown"] },
+        "disposition": { "enum": ["derived", "defaulted", "open", "stop"] },
+        "statement": { "type": "string", "minLength": 1 },
+        "blast_rank": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["kind", "reference"],
+          "properties": {
+            "kind": {
+              "enum": [
+                "explicit-user",
+                "code",
+                "configuration",
+                "test",
+                "standard",
+                "inference",
+                "unknown"
+              ]
+            },
+            "reference": { "type": "string", "minLength": 1 }
+          }
+        }
+      }
+    },
+    "authorityReceipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "target", "current_request_evidence"],
+      "properties": {
+        "action": { "enum": ["commit", "branch", "push", "pull-request"] },
+        "target": { "type": "string", "minLength": 1 },
+        "current_request_evidence": { "type": "string", "minLength": 1 }
+      }
+    },
+    "integrity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["algorithm", "canonical_sha256"],
+      "properties": {
+        "algorithm": { "const": "sha256" },
+        "canonical_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+      }
+    }
+  }
+}

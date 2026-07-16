@@ -1,0 +1,34 @@
+{
+  "schema_version": 2,
+  "analysis_version": "autopilot-0.6",
+  "run_id": "fixture-valid",
+  "mode": "build",
+  "depth": "strict",
+  "target": "example-project",
+  "prompt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "decisions": [
+    {
+      "id": "D-001",
+      "category": "persistent-format",
+      "reach": "external",
+      "disposition": "derived",
+      "statement": "Keep the existing version field in exported records.",
+      "blast_rank": 80,
+      "provenance": {
+        "kind": "code",
+        "reference": "src/export.py:41"
+      }
+    }
+  ],
+  "unfinished_markers": [
+    "TODO(autopilot:"
+  ],
+  "disclosure_decision_ids": [
+    "D-001"
+  ],
+  "outward_authority": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "canonical_sha256": "fd38448998dbefe4bf9163e914fdb3d56b78b8aee048681dcdec556bb0fb569a"
+  }
+}

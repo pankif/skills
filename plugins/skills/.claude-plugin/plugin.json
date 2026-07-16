@@ -1,0 +1,9 @@
+{
+  "name": "skills",
+  "description": "Portable, verification-aware workflows for autonomous building, specification, simulation, diagnosis, and sketching.",
+  "version": "0.6.0",
+  "author": {
+    "name": "pankif"
+  },
+  "homepage": "https://github.com/pankif/skills"
+}

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Spec"
+  short_description: "Turn fuzzy ideas into reviewable product specs"
+  default_prompt: "Use $spec to turn this feature idea into a concise, reviewable SPEC.md before implementation."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Autopilot"
+  short_description: "Drive a substantial feature through local verification"
+  default_prompt: "Use $autopilot to implement this feature end to end with proportional verification."
+
+policy:
+  allow_implicit_invocation: true

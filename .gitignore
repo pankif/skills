@@ -1,5 +1,7 @@
 # eval run scratch (with-skill/baseline outputs, benchmarks, viewers)
 *-workspace/
+.planning/
+.skill-runs/
 
 # python / os junk
 __pycache__/

@@ -1,0 +1,19 @@
+{
+  "schema_version": 2,
+  "analysis_version": "autopilot-0.6",
+  "run_id": "fixture-bad-reference",
+  "mode": "build",
+  "depth": "strict",
+  "target": "example-project",
+  "prompt_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "decisions": [],
+  "unfinished_markers": [],
+  "disclosure_decision_ids": [
+    "D-missing"
+  ],
+  "outward_authority": [],
+  "integrity": {
+    "algorithm": "sha256",
+    "canonical_sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "schema_version": 1,
+  "evaluation_version": 2,
+  "skill_name": "simulate",
+  "evals": [
+    {
+      "id": 0,
+      "name": "standard-stateful-payment-review",
+      "should_trigger": true,
+      "prompt": "Stress-test this payment design before we implement it. A pending order may be paid once; the API writes paid, emits order.paid, then calls an external receipt service. Concurrent requests share an idempotency key. Use the normal/default depth and create the simulation artifacts.",
+      "expected_output": "Uses standard mode; creates one shared state-transition matrix and a priority-ASC queue with 8-12 scenarios; covers concurrency and partial external failure; uses symbolic values by default; reports open HIGH/MED findings without looping merely to lower severity.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "targeted-cache-revocation",
+      "should_trigger": true,
+      "prompt": "Use simulate in targeted mode. Focus only on whether a revoked session can remain authorized through the cache. The design says the database marks revoked first and cache invalidation is asynchronous.",
+      "expected_output": "Requires and honors the cache-revocation focus; queues 4-8 relevant scenarios only; references shared transition ids; stops with focus inventory exhausted rather than expanding into unrelated login flows.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "deep-mode-hard-cap",
+      "should_trigger": true,
+      "prompt": "Deep-simulate this stateful workflow before implementation: multi-party approval, a ledger write, an outbox event, a delayed worker, cancellation, and an external settlement provider. Explore the important races and failures, but keep the run bounded.",
+      "expected_output": "Uses deep mode with no more than 20 total scenarios; at least 30 percent are negative paths; detailed traces are limited to priority-1, invariant-violating, or materially ambiguous scenarios.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "name": "attacks-only-excludes-golden",
+      "should_trigger": true,
+      "prompt": "Run attacks-only simulation against this single-use invite-token design. Check replay, concurrent redemption, expiry, audience mismatch, and revocation. Do not spend time on happy paths.",
+      "expected_output": "Uses attacks-only mode, queues 6-12 edge/attack scenarios and zero golden scenarios, and still obeys priority 1 highest with priority ASC then id ASC ordering.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "name": "changed-spec-does-not-resume-by-mtime",
+      "should_trigger": true,
+      "prompt": "Resume the existing simulation. _queue.json says schema_version 2 and spec_sha256 aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa, but the current spec hashes to bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb. The old files are useful, so do not delete them.",
+      "expected_output": "Fails closed on the digest mismatch, preserves every existing artifact, never consults mtime as authority, and asks for or proposes a fresh output directory.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "name": "legacy-v1-is-read-only",
+      "should_trigger": true,
+      "prompt": "Continue this old simulate run. Its _queue.json has version: 1 and no spec digest. Keep the history intact.",
+      "expected_output": "Recognizes queue v1, does not mutate or silently upgrade it, explains that it is inspectable only in read-only legacy mode, and uses a fresh output directory for a v2 run.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "name": "sequential-capability-fallback",
+      "should_trigger": true,
+      "prompt": "Simulate this queue-driven design in standard mode. This environment cannot launch parallel subagents, but it can execute roles one at a time.",
+      "expected_output": "Runs the same bounded queue sequentially in priority ASC then id ASC order, keeps role/artifact boundaries intact, and reports execution as sequential rather than claiming parallelism.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "name": "inventory-exhausted-with-high-findings",
+      "should_trigger": true,
+      "prompt": "The last pending scenario just completed and exposed an unresolved HIGH invariant violation. There are no distinct uncovered transitions or justified follow-ups left. Finish the simulation honestly.",
+      "expected_output": "Stops with scenario inventory exhausted even though HIGH remains and states exactly that the inventory is exhausted under the current model and unresolved findings remain; it does not invent more scenarios to chase LOW.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "name": "implemented-flaky-bug-is-diagnose-not-simulate",
+      "should_trigger": false,
+      "prompt": "Our implemented checkout test fails around one run in fifty. Reproduce it, find the root cause, and prove the fix direction from runtime evidence.",
+      "expected_output": "Does not invoke simulate because this is diagnosis of implemented behavior; routes to a debugging/diagnose workflow and does not generate spec simulation artifacts.",
+      "files": []
+    },
+    {
+      "id": 9,
+      "name": "spec-writing-is-not-simulation",
+      "should_trigger": false,
+      "prompt": "Turn this rough product idea into a complete PRD, interview me about missing behavior, and rewrite the document as SPEC.md.",
+      "expected_output": "Does not invoke simulate because the user wants spec authoring and interview; routes to a specification workflow and does not pretend to validate a nonexistent stable design.",
+      "files": []
+    },
+    {
+      "id": 10,
+      "name": "generic-code-review-is-not-simulation",
+      "should_trigger": false,
+      "prompt": "Review the implementation in src/checkout.ts for bugs, maintainability, and performance. The code already exists and there is no design document to simulate.",
+      "expected_output": "Does not invoke simulate; performs or routes to code review and does not create _analysis.md, _queue.json, scenario traces, or FINDINGS.md.",
+      "files": []
+    },
+    {
+      "id": 11,
+      "name": "interrupted-in-progress-recovery",
+      "should_trigger": true,
+      "prompt": "Resume a valid v2 run interrupted after a worker wrote sim-007-replay.md but before aggregation. Queue A03 is still in_progress, the file header and sentinel match A03, and next_counter is 8. Preserve completed work and continue safely.",
+      "expected_output": "Validates the bound analysis IDs and completed final, reports A03 for explicit promotion instead of rerunning or overwriting it, records its digest when moving to done, and keeps next_counter strictly greater than all reserved and on-disk prefixes; duplicate, corrupt, temporary, or unbound files halt for reconciliation.",
+      "files": []
+    },
+    {
+      "id": 12,
+      "name": "resume-rejects-undeclared-model-reference",
+      "should_trigger": true,
+      "prompt": "Resume this v2 simulation. The bound _analysis.md declares transitions T01 and T02 and invariant I01, but one queued scenario targets T99. Preserve the run and validate it before doing more work.",
+      "expected_output": "Fails closed because T99 is not in the canonical declared transition ID registry, leaves the queue and artifacts unchanged, and does not infer the identifier from prose or Markdown tables.",
+      "files": []
+    }
+  ]
+}
