@@ -1,0 +1,6 @@
+interface:
+  display_name: "Чек-лист ревью"
+  short_description: "Страница для решений по пунктам ревью"
+  default_prompt: "Собери интерактивный чек-лист по итогам ревью"
+policy:
+  allow_implicit_invocation: true

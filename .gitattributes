@@ -1,0 +1,3 @@
+* text=auto eol=lf
+# PowerShell 5.1 читает скрипт без BOM в кодировке ANSI — храним как есть: UTF-8 с BOM, CRLF
+*.ps1 -text

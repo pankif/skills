@@ -1,0 +1,88 @@
+# Скиллы для агентов
+
+Скиллы в открытом формате [Agent Skills](https://agentskills.io): папка с `SKILL.md` и нужными файлами. Один и тот же скилл работает в Codex, Claude Code и приложении Claude.
+
+## Скиллы
+
+| Скилл | Что делает |
+|---|---|
+| [`review-checklist`](skills/review-checklist) | Превращает итоги ревью в страницу, где владелец решает по каждому пункту «Делаем / Не делаем / Обсудить». Агент забирает решения и строит следующий шаг только из согласованного |
+
+## Структура
+
+```
+skills/
+  <имя>/                 один скилл — одна папка, имя папки = name в SKILL.md
+    SKILL.md             обязательно: frontmatter name + description, инструкции
+    scripts/             код, который запускает агент
+    assets/              шаблоны и файлы для результата
+    references/          подробности, которые агент читает по необходимости
+    agents/openai.yaml   необязательно: название и поведение в интерфейсе Codex
+templates/skill/         заготовка нового скилла
+scripts/
+  validate.py            проверка всех скиллов
+  package.py             zip для загрузки в приложение Claude
+  install.sh             установка для Codex и Claude Code (macOS, Linux)
+  install.ps1            то же для Windows
+.github/workflows/       проверка на каждый push
+```
+
+## Установка
+
+### Codex
+
+Codex ищет скиллы пользователя в `~/.agents/skills`, скиллы проекта — в `.agents/skills` внутри репозитория.
+
+```bash
+git clone https://github.com/pankif/skills
+cd skills
+scripts/install.sh codex            # или --link, чтобы git pull обновлял скиллы сразу
+```
+
+Windows:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\install.ps1 -Target codex
+```
+
+Перезапустите Codex. Скиллы видны в `/skills` или через `$`, например `$review-checklist`. Codex подключает скилл и сам, если задача подходит под его описание.
+
+### Claude Code
+
+Скиллы пользователя лежат в `~/.claude/skills`.
+
+```bash
+scripts/install.sh claude
+```
+
+Windows: `scripts\install.ps1 -Target claude`.
+
+### Приложение Claude (claude.ai, десктоп, Cowork)
+
+```bash
+python3 scripts/package.py review-checklist
+```
+
+Загрузите `dist/review-checklist.zip`: «Настройки → Capabilities → Skills → Upload skill». Если скилл с тем же именем уже есть, сначала удалите старый.
+
+### Обновление
+
+`git pull`, затем та же команда установки. С `--link` хватает `git pull`.
+
+## Как добавить скилл
+
+1. Скопируйте заготовку: `cp -r templates/skill skills/<имя>`. Имя — строчная латиница и дефисы, до 64 знаков.
+2. Заполните `SKILL.md`:
+   - `name` — как у папки;
+   - `description` — что делает и когда его брать, до 1024 знаков, без `<` и `>`. По нему агент решает, подключать ли скилл.
+3. Код — в `scripts/`, шаблоны — в `assets/`, длинные подробности — в `references/`. В `SKILL.md` ссылайтесь на них путями от папки скилла.
+4. Если нужно, добавьте `agents/openai.yaml` — название и подсказку для интерфейса Codex.
+5. Проверьте: `python3 scripts/validate.py`.
+6. Добавьте строку в таблицу «Скиллы» выше.
+
+## Правила
+
+- Скилл самодостаточен: всё нужное лежит в его папке, без общего кода между скиллами. Так его можно поставить отдельно.
+- Скрипты — по возможности на стандартной библиотеке, без установки пакетов.
+- `SKILL.md` — до 500 строк. Подробности — в `references/`.
+- Инструкции работают везде. Если шаг зависит от агента (артефакты в Claude, терминал в Codex), опишите оба пути.

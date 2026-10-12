@@ -1,0 +1,24 @@
+name: validate
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  skills:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Проверить скиллы
+        run: python scripts/validate.py
+      - name: Собрать zip
+        run: python scripts/package.py
+      - name: review-checklist — сборка примера
+        run: |
+          python skills/review-checklist/scripts/build.py skills/review-checklist/assets/example-spec.json /tmp/rc
+          printf 'П1 — Делаем — проверка\nП2 — Обсудить\n' > /tmp/rc/pasted.txt
+          python skills/review-checklist/scripts/collect.py /tmp/rc/checkout-review-items.json /tmp/rc/pasted.txt --md /tmp/rc/checkout-review.md
+          grep -q 'делаем — 1' /tmp/rc/checkout-review.md
