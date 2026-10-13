@@ -1,0 +1,2588 @@
+{
+  "title": "Бэкапы судного дня",
+  "subtitle": "Сбор критичных данных · пример",
+  "services": [
+    {
+      "id": "support",
+      "name": "Поддержка",
+      "icon": "chat",
+      "sections": [
+        {
+          "id": "requests",
+          "name": "Обращения и чат",
+          "icon": "chat",
+          "desc": "Обращения клиентов из личного кабинета, приложения и почты, живой чат с оператором.",
+          "components": [
+            {
+              "id": "web",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Виджет в ЛК",
+              "tech": "React SPA",
+              "desc": "Форма обращения и чат в личном кабинете.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "mobile",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Мобильное приложение",
+              "tech": "iOS · Android",
+              "desc": "Раздел «Помощь»: чат и история обращений.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "email",
+              "layer": "entry",
+              "kind": "channel",
+              "name": "Почта support@",
+              "tech": "входящие письма",
+              "desc": "Письма клиентов превращаются в обращения.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "gateway",
+              "layer": "app",
+              "kind": "gateway",
+              "name": "API-шлюз",
+              "tech": "nginx · Kong",
+              "desc": "TLS, авторизация по токену, маршруты к сервисам.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "kong/support.yaml",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "sso",
+              "layer": "app",
+              "kind": "auth",
+              "name": "Keycloak",
+              "tech": "realm support",
+              "desc": "Вход клиентов и операторов, роли.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "realm-export support.json",
+                  "status": "no",
+                  "note": "экспорт realm не настроен"
+                }
+              ]
+            },
+            {
+              "id": "tickets",
+              "layer": "app",
+              "kind": "service",
+              "name": "Tickets API",
+              "tech": "Go",
+              "desc": "Создание и маршрутизация обращений, статусы.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/tickets-api",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                },
+                {
+                  "type": "secret",
+                  "name": "tickets-api/db",
+                  "status": "yes",
+                  "where": "снапшот Vault → doomsday-хранилище (зашифрован)"
+                }
+              ]
+            },
+            {
+              "id": "chat",
+              "layer": "app",
+              "kind": "service",
+              "name": "Chat Gateway",
+              "tech": "Node.js · WebSocket",
+              "desc": "Живой чат клиента с оператором.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/chat-gateway",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "files",
+              "layer": "app",
+              "kind": "service",
+              "name": "Вложения",
+              "tech": "Go · S3 API",
+              "desc": "Загрузка файлов к обращениям.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/files-service",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                },
+                {
+                  "type": "secret",
+                  "name": "files/s3-keys",
+                  "status": "yes",
+                  "where": "снапшот Vault → doomsday-хранилище (зашифрован)"
+                }
+              ]
+            },
+            {
+              "id": "kafka",
+              "layer": "bus",
+              "kind": "stream",
+              "name": "Kafka",
+              "tech": "кластер support",
+              "desc": "События тикетов и чата.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "topic",
+                  "name": "support.ticket-events",
+                  "size": "хранение 7 дней",
+                  "status": "yes",
+                  "where": "MirrorMaker 2 в резервный ЦОД"
+                },
+                {
+                  "type": "topic",
+                  "name": "support.chat-events",
+                  "size": "хранение 3 дня",
+                  "status": "no",
+                  "note": "не реплицируется"
+                }
+              ]
+            },
+            {
+              "id": "rabbit",
+              "layer": "bus",
+              "kind": "queue",
+              "name": "RabbitMQ",
+              "tech": "notifications",
+              "desc": "Очередь на отправку уведомлений.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "definitions.json",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                },
+                {
+                  "type": "queue",
+                  "name": "notify.cmd",
+                  "status": "skip",
+                  "note": "транзитные сообщения"
+                }
+              ]
+            },
+            {
+              "id": "redis",
+              "layer": "bus",
+              "kind": "cache",
+              "name": "Redis",
+              "tech": "сессии · кеш",
+              "desc": "Сессии операторов и присутствие в чате.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "cache",
+                  "name": "sessions, presence",
+                  "status": "skip",
+                  "note": "кеш, восстанавливается сам"
+                }
+              ]
+            },
+            {
+              "id": "mail-ingest",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Mail ingest",
+              "tech": "IMAP",
+              "desc": "Забирает письма из ящика и создаёт тикеты.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "mail-poll",
+                  "status": "yes",
+                  "where": "манифест CronJob в GitLab + архив в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "sla",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "SLA-движок",
+              "tech": "Go",
+              "desc": "Таймеры реакции и эскалации.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "sla-recalc",
+                  "status": "yes",
+                  "where": "манифест CronJob в GitLab + архив в doomsday-хранилище"
+                },
+                {
+                  "type": "cron",
+                  "name": "sla-escalate",
+                  "status": "no",
+                  "note": "создан вручную в кластере, в GitLab нет"
+                }
+              ]
+            },
+            {
+              "id": "notify",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Уведомления",
+              "tech": "email · push",
+              "desc": "Отправляет клиенту ответы и смену статуса.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/notify-worker",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "pg",
+              "layer": "data",
+              "kind": "db",
+              "name": "support_db",
+              "tech": "PostgreSQL 16",
+              "desc": "Обращения, переписка, SLA, метаданные вложений.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "tickets",
+                  "status": "yes",
+                  "where": "дамп support_db → doomsday-хранилище",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "tickets",
+                      "size": "12,4 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "ticket_messages",
+                      "size": "88 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "ticket_events",
+                      "size": "140 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "sla_timers",
+                      "size": "1,1 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "tickets_archive",
+                      "size": "61 млн строк",
+                      "status": "no",
+                      "note": "исключена из бэкапа: unlogged"
+                    }
+                  ]
+                },
+                {
+                  "type": "schema",
+                  "name": "attachments",
+                  "status": "yes",
+                  "where": "дамп support_db → doomsday-хранилище",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "attachment_meta",
+                      "size": "9,8 млн строк"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "kc-db",
+              "layer": "data",
+              "kind": "db",
+              "name": "keycloak_db",
+              "tech": "PostgreSQL 14",
+              "desc": "Учётки операторов, роли, OAuth-клиенты.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "keycloak",
+                  "status": "no",
+                  "note": "отдельный инстанс, бэкап не настроен",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "user_entity",
+                      "size": "1 840 строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "realm",
+                      "size": "3 строки"
+                    },
+                    {
+                      "type": "table",
+                      "name": "client",
+                      "size": "46 строк"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "mongo",
+              "layer": "data",
+              "kind": "db",
+              "name": "chat_history",
+              "tech": "MongoDB 7",
+              "desc": "История чатов.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "collection",
+                  "name": "messages",
+                  "size": "410 млн документов",
+                  "status": "yes",
+                  "where": "mongodump chat_history → doomsday-хранилище"
+                },
+                {
+                  "type": "collection",
+                  "name": "dialogs",
+                  "size": "22 млн документов",
+                  "status": "yes",
+                  "where": "mongodump chat_history → doomsday-хранилище"
+                },
+                {
+                  "type": "collection",
+                  "name": "bot_context",
+                  "size": "5 млн документов",
+                  "status": "skip",
+                  "note": "контекст бота, живёт сутки"
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "layer": "data",
+              "kind": "object",
+              "name": "support-attachments",
+              "tech": "MinIO · 4,8 ТБ",
+              "desc": "Файлы, приложенные к обращениям.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "bucket",
+                  "name": "support-attachments",
+                  "size": "4,8 ТБ",
+                  "status": "yes",
+                  "where": "копия бакета → doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "exchange",
+              "layer": "external",
+              "kind": "mail",
+              "name": "Ящик support@",
+              "tech": "Exchange · ИТ",
+              "desc": "Почтовый ящик, из которого забираются письма.",
+              "sources": [
+                "CMDB"
+              ],
+              "items": [
+                {
+                  "type": "mailbox",
+                  "name": "support@",
+                  "size": "85 ГБ",
+                  "status": "unknown",
+                  "note": "ИТ не подтвердили, что ящик попал в выгрузку"
+                }
+              ]
+            }
+          ],
+          "links": [
+            [
+              "web",
+              "gateway",
+              "HTTPS"
+            ],
+            [
+              "mobile",
+              "gateway",
+              "HTTPS"
+            ],
+            [
+              "email",
+              "mail-ingest",
+              "письма"
+            ],
+            [
+              "gateway",
+              "sso",
+              "OIDC"
+            ],
+            [
+              "gateway",
+              "tickets",
+              "REST"
+            ],
+            [
+              "gateway",
+              "chat",
+              "WebSocket"
+            ],
+            [
+              "gateway",
+              "files",
+              "REST"
+            ],
+            [
+              "sso",
+              "kc-db",
+              "JDBC"
+            ],
+            [
+              "tickets",
+              "pg",
+              "SQL"
+            ],
+            [
+              "tickets",
+              "kafka",
+              "события"
+            ],
+            [
+              "tickets",
+              "rabbit",
+              "команды"
+            ],
+            [
+              "tickets",
+              "redis",
+              "кеш"
+            ],
+            [
+              "chat",
+              "mongo",
+              "сообщения"
+            ],
+            [
+              "chat",
+              "kafka",
+              "события"
+            ],
+            [
+              "chat",
+              "redis",
+              "присутствие"
+            ],
+            [
+              "files",
+              "s3",
+              "файлы"
+            ],
+            [
+              "files",
+              "pg",
+              "метаданные"
+            ],
+            [
+              "kafka",
+              "sla",
+              "consume"
+            ],
+            [
+              "rabbit",
+              "notify",
+              "consume"
+            ],
+            [
+              "sla",
+              "pg",
+              "таймеры"
+            ],
+            [
+              "mail-ingest",
+              "pg",
+              "тикеты"
+            ],
+            [
+              "mail-ingest",
+              "s3",
+              "вложения"
+            ],
+            [
+              "mail-ingest",
+              "exchange",
+              "IMAP"
+            ]
+          ]
+        },
+        {
+          "id": "kb",
+          "name": "База знаний",
+          "icon": "book",
+          "desc": "Статьи справки для клиентов и шаблоны ответов для операторов.",
+          "components": [
+            {
+              "id": "help",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Справка на сайте",
+              "tech": "Next.js",
+              "desc": "Публичные статьи и поиск по ним.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "editor",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Редактор статей",
+              "tech": "админка",
+              "desc": "Редакторы пишут и публикуют статьи.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "kb-api",
+              "layer": "app",
+              "kind": "service",
+              "name": "KB API",
+              "tech": "Python · FastAPI",
+              "desc": "Выдача статей и категорий.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/kb-api",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "editor-api",
+              "layer": "app",
+              "kind": "service",
+              "name": "Editor API",
+              "tech": "Python",
+              "desc": "Черновики, версии, публикация.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/kb-editor",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                },
+                {
+                  "type": "secret",
+                  "name": "kb-editor/db",
+                  "status": "yes",
+                  "where": "снапшот Vault → doomsday-хранилище (зашифрован)"
+                }
+              ]
+            },
+            {
+              "id": "search",
+              "layer": "app",
+              "kind": "service",
+              "name": "Поиск",
+              "tech": "Go",
+              "desc": "Поиск по статьям с подсказками.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/kb-search",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "redis",
+              "layer": "bus",
+              "kind": "cache",
+              "name": "Кеш статей",
+              "tech": "Redis",
+              "desc": "Горячие статьи и результаты поиска.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "cache",
+                  "name": "articles:*",
+                  "status": "skip",
+                  "note": "кеш, прогревается сам"
+                }
+              ]
+            },
+            {
+              "id": "indexer",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Индексатор",
+              "tech": "Python",
+              "desc": "Переиндексация статей каждую ночь.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "reindex-nightly",
+                  "status": "yes",
+                  "where": "манифест CronJob в GitLab + архив в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "pdf",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "PDF-версии",
+              "tech": "WeasyPrint",
+              "desc": "Собирает PDF статей для печати.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "pdf-rebuild",
+                  "status": "no",
+                  "note": "crontab внутри образа, исходника нет"
+                }
+              ]
+            },
+            {
+              "id": "pg",
+              "layer": "data",
+              "kind": "db",
+              "name": "kb_db",
+              "tech": "PostgreSQL 16",
+              "desc": "Статьи, версии, категории.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "kb",
+                  "status": "yes",
+                  "where": "дамп kb_db → doomsday-хранилище",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "articles",
+                      "size": "18 тыс. строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "article_versions",
+                      "size": "240 тыс. строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "categories",
+                      "size": "310 строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "reply_templates",
+                      "size": "2 900 строк"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "es",
+              "layer": "data",
+              "kind": "search",
+              "name": "kb-index",
+              "tech": "OpenSearch 2",
+              "desc": "Поисковый индекс статей.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "index",
+                  "name": "kb-articles-v3",
+                  "size": "2,1 ГБ",
+                  "status": "skip",
+                  "note": "пересобирается из kb_db за 20 минут"
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "layer": "data",
+              "kind": "object",
+              "name": "kb-images",
+              "tech": "MinIO · 120 ГБ",
+              "desc": "Картинки и вложения статей.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "bucket",
+                  "name": "kb-images",
+                  "size": "120 ГБ",
+                  "status": "no",
+                  "note": "одна площадка, без репликации"
+                }
+              ]
+            },
+            {
+              "id": "translate",
+              "layer": "external",
+              "kind": "external",
+              "name": "Сервис перевода",
+              "tech": "внешний API",
+              "desc": "Машинный перевод черновиков.",
+              "sources": [
+                "CMDB"
+              ]
+            }
+          ],
+          "links": [
+            [
+              "help",
+              "kb-api",
+              "REST"
+            ],
+            [
+              "help",
+              "search",
+              "REST"
+            ],
+            [
+              "editor",
+              "editor-api",
+              "REST"
+            ],
+            [
+              "kb-api",
+              "redis",
+              "кеш"
+            ],
+            [
+              "kb-api",
+              "pg",
+              "SQL"
+            ],
+            [
+              "search",
+              "redis",
+              "кеш"
+            ],
+            [
+              "search",
+              "es",
+              "поиск"
+            ],
+            [
+              "editor-api",
+              "pg",
+              "SQL"
+            ],
+            [
+              "editor-api",
+              "s3",
+              "картинки"
+            ],
+            [
+              "editor-api",
+              "translate",
+              "перевод"
+            ],
+            [
+              "indexer",
+              "pg",
+              "чтение"
+            ],
+            [
+              "indexer",
+              "es",
+              "индексация"
+            ],
+            [
+              "pdf",
+              "pg",
+              "чтение"
+            ],
+            [
+              "pdf",
+              "s3",
+              "PDF"
+            ]
+          ]
+        },
+        {
+          "id": "phone",
+          "name": "Телефония",
+          "icon": "phone",
+          "desc": "Линия 8-800, обратный звонок, записи разговоров.",
+          "components": [
+            {
+              "id": "line",
+              "layer": "entry",
+              "kind": "channel",
+              "name": "Линия 8-800",
+              "tech": "SIP-транк",
+              "desc": "Входящие звонки клиентов.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "callback",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Заказ звонка",
+              "tech": "виджет в ЛК",
+              "desc": "Клиент оставляет номер, оператор перезванивает.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "pbx",
+              "layer": "app",
+              "kind": "pbx",
+              "name": "АТС",
+              "tech": "Asterisk 20",
+              "desc": "IVR-меню, очереди операторов, запись разговоров.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "/etc/asterisk (dialplan)",
+                  "status": "no",
+                  "note": "только на сервере"
+                },
+                {
+                  "type": "file",
+                  "name": "IVR-приветствия",
+                  "size": "64 файла",
+                  "status": "no",
+                  "note": "только на сервере"
+                }
+              ]
+            },
+            {
+              "id": "cti",
+              "layer": "app",
+              "kind": "service",
+              "name": "CTI-коннектор",
+              "tech": "Go · ARI",
+              "desc": "Связывает звонки с тикетами и карточкой клиента.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/cti-connector",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "cb-api",
+              "layer": "app",
+              "kind": "service",
+              "name": "Callback API",
+              "tech": "Go",
+              "desc": "Принимает заявки на обратный звонок.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/callback-api",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "rabbit",
+              "layer": "bus",
+              "kind": "queue",
+              "name": "Очередь звонков",
+              "tech": "RabbitMQ",
+              "desc": "Заявки на обратный звонок.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "queue",
+                  "name": "callback.requests",
+                  "status": "skip",
+                  "note": "заявки дублируются в telephony_db"
+                }
+              ]
+            },
+            {
+              "id": "upload",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Выгрузка записей",
+              "tech": "Go",
+              "desc": "Переносит записи разговоров с АТС в S3.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "recordings-upload",
+                  "status": "yes",
+                  "where": "манифест CronJob в GitLab + архив в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "retention",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Очистка записей",
+              "tech": "bash",
+              "desc": "Удаляет записи старше 3 лет.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "recordings-retention",
+                  "status": "no",
+                  "note": "crontab на сервере АТС"
+                }
+              ]
+            },
+            {
+              "id": "pg",
+              "layer": "data",
+              "kind": "db",
+              "name": "telephony_db",
+              "tech": "PostgreSQL 16",
+              "desc": "Звонки, очереди, заявки на перезвон.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "calls",
+                  "status": "yes",
+                  "where": "дамп telephony_db → doomsday-хранилище",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "calls",
+                      "size": "9 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "call_events",
+                      "size": "64 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "callback_requests",
+                      "size": "310 тыс. строк"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "layer": "data",
+              "kind": "object",
+              "name": "call-recordings",
+              "tech": "MinIO · 9,2 ТБ",
+              "desc": "Записи разговоров, хранятся 3 года.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "bucket",
+                  "name": "call-recordings",
+                  "size": "9,2 ТБ",
+                  "status": "yes",
+                  "where": "репликация в резервный ЦОД, без версий"
+                }
+              ]
+            },
+            {
+              "id": "sip",
+              "layer": "external",
+              "kind": "external",
+              "name": "Оператор связи",
+              "tech": "SIP-транк",
+              "desc": "Номер 8-800 и входящие линии.",
+              "sources": [
+                "CMDB"
+              ]
+            }
+          ],
+          "links": [
+            [
+              "line",
+              "pbx",
+              "SIP"
+            ],
+            [
+              "callback",
+              "cb-api",
+              "REST"
+            ],
+            [
+              "pbx",
+              "cti",
+              "ARI"
+            ],
+            [
+              "pbx",
+              "sip",
+              "SIP"
+            ],
+            [
+              "cti",
+              "pg",
+              "звонки"
+            ],
+            [
+              "cb-api",
+              "rabbit",
+              "заявки"
+            ],
+            [
+              "cb-api",
+              "pg",
+              "SQL"
+            ],
+            [
+              "cti",
+              "rabbit",
+              "заявки"
+            ],
+            [
+              "upload",
+              "s3",
+              "записи"
+            ],
+            [
+              "upload",
+              "pg",
+              "метаданные"
+            ],
+            [
+              "retention",
+              "s3",
+              "удаление"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "moderation",
+      "name": "Модерация",
+      "icon": "shield",
+      "sections": [
+        {
+          "id": "reviews",
+          "name": "Отзывы",
+          "icon": "star",
+          "desc": "Отзывы клиентов о визитах и сервисе: приём, проверка, публикация.",
+          "components": [
+            {
+              "id": "site",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Отзывы на сайте",
+              "tech": "React",
+              "desc": "Клиент оставляет отзыв и оценку.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "panel",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Панель модератора",
+              "tech": "админка",
+              "desc": "Очередь отзывов на проверку.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "reviews-api",
+              "layer": "app",
+              "kind": "service",
+              "name": "Reviews API",
+              "tech": "Kotlin",
+              "desc": "Приём и выдача отзывов.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/reviews-api",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                },
+                {
+                  "type": "secret",
+                  "name": "reviews/db",
+                  "status": "yes",
+                  "where": "снапшот Vault → doomsday-хранилище (зашифрован)"
+                }
+              ]
+            },
+            {
+              "id": "mod-api",
+              "layer": "app",
+              "kind": "service",
+              "name": "Moderation API",
+              "tech": "Kotlin",
+              "desc": "Решения модераторов, правила, бан-листы.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/moderation-api",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "ml",
+              "layer": "app",
+              "kind": "service",
+              "name": "Классификатор токсичности",
+              "tech": "Python · ONNX",
+              "desc": "Оценивает текст до ручной проверки.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/toxicity-ml",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "rabbit",
+              "layer": "bus",
+              "kind": "queue",
+              "name": "Очередь модерации",
+              "tech": "RabbitMQ",
+              "desc": "Отзывы, ждущие проверки.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "queue",
+                  "name": "moderation.pending",
+                  "status": "skip",
+                  "note": "статус отзыва хранится в reviews_db"
+                }
+              ]
+            },
+            {
+              "id": "redis",
+              "layer": "bus",
+              "kind": "cache",
+              "name": "Rate limit",
+              "tech": "Redis",
+              "desc": "Ограничение частоты отзывов.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "cache",
+                  "name": "ratelimit:*",
+                  "status": "skip",
+                  "note": "счётчики на час"
+                }
+              ]
+            },
+            {
+              "id": "publish",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Автопубликация",
+              "tech": "Kotlin",
+              "desc": "Публикует отзывы, прошедшие проверку.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "auto-publish",
+                  "status": "yes",
+                  "where": "манифест CronJob в GitLab + архив в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "rating",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Пересчёт рейтингов",
+              "tech": "SQL",
+              "desc": "Пересчитывает средние оценки.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "rating-recalc",
+                  "status": "yes",
+                  "where": "манифест CronJob в GitLab + архив в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "pg",
+              "layer": "data",
+              "kind": "db",
+              "name": "reviews_db",
+              "tech": "PostgreSQL 15",
+              "desc": "Отзывы, голоса, решения модераторов.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "reviews",
+                  "status": "yes",
+                  "where": "дамп reviews_db → doomsday-хранилище",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "reviews",
+                      "size": "3,2 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "review_votes",
+                      "size": "11 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "moderation_decisions",
+                      "size": "4 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "banned_words",
+                      "size": "6 200 строк"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "layer": "data",
+              "kind": "object",
+              "name": "ml-models",
+              "tech": "MinIO · 3 ГБ",
+              "desc": "Веса моделей классификатора.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "bucket",
+                  "name": "ml-models",
+                  "size": "toxic-v7.onnx и ещё 4",
+                  "status": "no",
+                  "note": "одна копия, без репликации"
+                }
+              ]
+            }
+          ],
+          "links": [
+            [
+              "site",
+              "reviews-api",
+              "REST"
+            ],
+            [
+              "panel",
+              "mod-api",
+              "REST"
+            ],
+            [
+              "reviews-api",
+              "ml",
+              "оценка"
+            ],
+            [
+              "reviews-api",
+              "rabbit",
+              "на проверку"
+            ],
+            [
+              "reviews-api",
+              "redis",
+              "лимиты"
+            ],
+            [
+              "reviews-api",
+              "pg",
+              "SQL"
+            ],
+            [
+              "mod-api",
+              "rabbit",
+              "очередь"
+            ],
+            [
+              "mod-api",
+              "pg",
+              "решения"
+            ],
+            [
+              "ml",
+              "s3",
+              "модель"
+            ],
+            [
+              "publish",
+              "pg",
+              "публикация"
+            ],
+            [
+              "rating",
+              "pg",
+              "рейтинги"
+            ]
+          ]
+        },
+        {
+          "id": "media",
+          "name": "Медиаконтент",
+          "icon": "photo",
+          "desc": "Фото и документы, которые загружают клиенты и партнёры.",
+          "components": [
+            {
+              "id": "upload",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Загрузка файлов",
+              "tech": "ЛК и приложение",
+              "desc": "Клиент прикладывает фото или скан.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "panel",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Панель модератора",
+              "tech": "админка",
+              "desc": "Проверка спорных изображений.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "media-api",
+              "layer": "app",
+              "kind": "service",
+              "name": "Media API",
+              "tech": "Go",
+              "desc": "Приём файлов, выдача превью.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/media-api",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                },
+                {
+                  "type": "secret",
+                  "name": "media/s3-keys",
+                  "status": "yes",
+                  "where": "снапшот Vault → doomsday-хранилище (зашифрован)"
+                }
+              ]
+            },
+            {
+              "id": "av",
+              "layer": "app",
+              "kind": "service",
+              "name": "Антивирус",
+              "tech": "ClamAV",
+              "desc": "Проверяет каждый файл до сохранения.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "clamd.conf",
+                  "status": "unknown",
+                  "note": "в GitLab не нашли, уточнить у владельца"
+                }
+              ]
+            },
+            {
+              "id": "ml",
+              "layer": "app",
+              "kind": "service",
+              "name": "Классификатор изображений",
+              "tech": "Python",
+              "desc": "Отсеивает недопустимые изображения.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/image-ml",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "kafka",
+              "layer": "bus",
+              "kind": "stream",
+              "name": "Kafka",
+              "tech": "media.events",
+              "desc": "События загрузки и проверки.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "topic",
+                  "name": "media.events",
+                  "size": "хранение 3 дня",
+                  "status": "no",
+                  "note": "не реплицируется"
+                }
+              ]
+            },
+            {
+              "id": "thumbs",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Превью",
+              "tech": "libvips",
+              "desc": "Делает превью разных размеров.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/thumbnailer",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "purge",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Очистка отклонённых",
+              "tech": "Go",
+              "desc": "Удаляет отклонённые файлы через 30 дней.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "purge-rejected",
+                  "status": "no",
+                  "note": "cron внутри контейнера, в GitLab нет"
+                }
+              ]
+            },
+            {
+              "id": "pg",
+              "layer": "data",
+              "kind": "db",
+              "name": "media_db",
+              "tech": "PostgreSQL 16",
+              "desc": "Карточки файлов и журнал проверок.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "media",
+                  "status": "yes",
+                  "where": "дамп media_db → doomsday-хранилище",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "media_items",
+                      "size": "2,1 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "moderation_log",
+                      "size": "6,4 млн строк"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "s3-raw",
+              "layer": "data",
+              "kind": "object",
+              "name": "media-raw",
+              "tech": "MinIO · 400 ГБ",
+              "desc": "Файлы до проверки.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "bucket",
+                  "name": "media-raw",
+                  "size": "400 ГБ",
+                  "status": "skip",
+                  "note": "временные, живут 7 дней"
+                }
+              ]
+            },
+            {
+              "id": "s3-ok",
+              "layer": "data",
+              "kind": "object",
+              "name": "media-approved",
+              "tech": "MinIO · 6,3 ТБ",
+              "desc": "Проверенные файлы и превью.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "bucket",
+                  "name": "media-approved",
+                  "size": "6,3 ТБ",
+                  "status": "yes",
+                  "where": "копия бакета → doomsday-хранилище"
+                }
+              ]
+            }
+          ],
+          "links": [
+            [
+              "upload",
+              "media-api",
+              "HTTPS"
+            ],
+            [
+              "panel",
+              "media-api",
+              "REST"
+            ],
+            [
+              "media-api",
+              "av",
+              "проверка"
+            ],
+            [
+              "media-api",
+              "ml",
+              "оценка"
+            ],
+            [
+              "media-api",
+              "kafka",
+              "события"
+            ],
+            [
+              "media-api",
+              "pg",
+              "SQL"
+            ],
+            [
+              "media-api",
+              "s3-raw",
+              "загрузка"
+            ],
+            [
+              "kafka",
+              "thumbs",
+              "consume"
+            ],
+            [
+              "thumbs",
+              "s3-ok",
+              "превью"
+            ],
+            [
+              "thumbs",
+              "s3-raw",
+              "чтение"
+            ],
+            [
+              "purge",
+              "s3-raw",
+              "удаление"
+            ],
+            [
+              "purge",
+              "pg",
+              "журнал"
+            ]
+          ]
+        },
+        {
+          "id": "complaints",
+          "name": "Жалобы",
+          "icon": "flag",
+          "desc": "Жалобы и претензии клиентов с юридическим сроком ответа.",
+          "components": [
+            {
+              "id": "form",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Форма жалобы",
+              "tech": "ЛК",
+              "desc": "Клиент подаёт жалобу с документами.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "legal",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Панель юриста",
+              "tech": "админка",
+              "desc": "Рассмотрение и ответ по жалобе.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "api",
+              "layer": "app",
+              "kind": "service",
+              "name": "Complaints API",
+              "tech": "Java",
+              "desc": "Приём жалоб, статусы, ответы.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/complaints-api",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                },
+                {
+                  "type": "secret",
+                  "name": "complaints/db",
+                  "status": "yes",
+                  "where": "снапшот Vault → doomsday-хранилище (зашифрован)"
+                }
+              ]
+            },
+            {
+              "id": "bpm",
+              "layer": "app",
+              "kind": "service",
+              "name": "Camunda",
+              "tech": "BPMN 7.20",
+              "desc": "Маршрут рассмотрения и сроки.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "complaint-flow.bpmn",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "remind",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Напоминания о сроках",
+              "tech": "Java",
+              "desc": "Пишет юристам о подходящих сроках.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "deadline-reminders",
+                  "status": "yes",
+                  "where": "манифест CronJob в GitLab + архив в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "sed",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Выгрузка в СЭД",
+              "tech": "Java",
+              "desc": "Передаёт закрытые жалобы в документооборот.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "sed-export",
+                  "status": "no",
+                  "note": "настроен в планировщике Windows"
+                }
+              ]
+            },
+            {
+              "id": "pg",
+              "layer": "data",
+              "kind": "db",
+              "name": "complaints_db",
+              "tech": "PostgreSQL 16",
+              "desc": "Жалобы, решения, переписка.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "complaints",
+                  "status": "yes",
+                  "where": "дамп complaints_db → doomsday-хранилище",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "complaints",
+                      "size": "140 тыс. строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "decisions",
+                      "size": "128 тыс. строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "correspondence",
+                      "size": "910 тыс. строк"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "camunda-db",
+              "layer": "data",
+              "kind": "db",
+              "name": "camunda_db",
+              "tech": "PostgreSQL 14",
+              "desc": "Состояние процессов Camunda.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "camunda",
+                  "status": "no",
+                  "note": "бэкап не настроен",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "act_ru_execution",
+                      "size": "4 200 строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "act_hi_procinst",
+                      "size": "150 тыс. строк"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "s3",
+              "layer": "data",
+              "kind": "object",
+              "name": "complaint-files",
+              "tech": "MinIO · 210 ГБ",
+              "desc": "Документы к жалобам.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "bucket",
+                  "name": "complaint-files",
+                  "size": "210 ГБ",
+                  "status": "unknown",
+                  "note": "в CMDB «реплицируется», подтверждения нет"
+                }
+              ]
+            },
+            {
+              "id": "sed-sys",
+              "layer": "external",
+              "kind": "external",
+              "name": "СЭД",
+              "tech": "документооборот",
+              "desc": "Система электронного документооборота.",
+              "sources": [
+                "CMDB"
+              ]
+            }
+          ],
+          "links": [
+            [
+              "form",
+              "api",
+              "REST"
+            ],
+            [
+              "legal",
+              "api",
+              "REST"
+            ],
+            [
+              "api",
+              "bpm",
+              "процесс"
+            ],
+            [
+              "api",
+              "pg",
+              "SQL"
+            ],
+            [
+              "api",
+              "s3",
+              "документы"
+            ],
+            [
+              "bpm",
+              "camunda-db",
+              "JDBC"
+            ],
+            [
+              "remind",
+              "pg",
+              "сроки"
+            ],
+            [
+              "sed",
+              "pg",
+              "чтение"
+            ],
+            [
+              "sed",
+              "sed-sys",
+              "выгрузка"
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "id": "notifications",
+      "name": "Уведомления",
+      "icon": "bell",
+      "sections": [
+        {
+          "id": "email-sms",
+          "name": "Email и SMS",
+          "icon": "envelope",
+          "desc": "Письма и SMS клиентам: готовность результатов, записи, ответы поддержки.",
+          "components": [
+            {
+              "id": "senders",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Сервисы-отправители",
+              "tech": "внутренние",
+              "desc": "Другие разделы ставят уведомления в очередь.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "api",
+              "layer": "app",
+              "kind": "service",
+              "name": "Notify API",
+              "tech": "Go",
+              "desc": "Принимает запросы на отправку.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/notify-api",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "tpl",
+              "layer": "app",
+              "kind": "service",
+              "name": "Шаблоны",
+              "tech": "Go · MJML",
+              "desc": "Тексты писем и SMS.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/templates",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "rabbit",
+              "layer": "bus",
+              "kind": "queue",
+              "name": "RabbitMQ",
+              "tech": "notify.*",
+              "desc": "Очереди писем и SMS.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "definitions.json",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                },
+                {
+                  "type": "queue",
+                  "name": "notify.email, notify.sms",
+                  "status": "skip",
+                  "note": "повтор отправки из delivery_log"
+                }
+              ]
+            },
+            {
+              "id": "mailer",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Отправка email",
+              "tech": "Go",
+              "desc": "Отправляет письма через SMTP-релей.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/mailer",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "sms",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Отправка SMS",
+              "tech": "Go",
+              "desc": "Отправляет SMS через шлюз оператора.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/sms-sender",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "cleanup",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Чистка журнала",
+              "tech": "SQL",
+              "desc": "Удаляет журнал старше 90 дней.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "delivery-log-cleanup",
+                  "status": "yes",
+                  "where": "манифест CronJob в GitLab + архив в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "pg",
+              "layer": "data",
+              "kind": "db",
+              "name": "notify_db",
+              "tech": "PostgreSQL 16",
+              "desc": "Шаблоны и журнал доставки.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "notify",
+                  "status": "yes",
+                  "where": "дамп notify_db → doomsday-хранилище",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "templates",
+                      "size": "1 200 строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "subscriptions",
+                      "size": "4,8 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "delivery_log",
+                      "size": "300 млн строк",
+                      "status": "no",
+                      "note": "исключена из бэкапа: большой объём"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "ch",
+              "layer": "data",
+              "kind": "analytics",
+              "name": "delivery_stats",
+              "tech": "ClickHouse",
+              "desc": "Статистика доставки для отчётов.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "table",
+                  "name": "deliveries_daily",
+                  "size": "2 года истории",
+                  "status": "no",
+                  "note": "clickhouse-backup не настроен"
+                }
+              ]
+            },
+            {
+              "id": "smtp",
+              "layer": "external",
+              "kind": "external",
+              "name": "SMTP-релей",
+              "tech": "внешний",
+              "desc": "Отправка писем наружу.",
+              "sources": [
+                "CMDB"
+              ]
+            },
+            {
+              "id": "gw",
+              "layer": "external",
+              "kind": "external",
+              "name": "SMS-шлюз",
+              "tech": "оператор",
+              "desc": "Отправка SMS.",
+              "sources": [
+                "CMDB"
+              ]
+            }
+          ],
+          "links": [
+            [
+              "senders",
+              "api",
+              "REST"
+            ],
+            [
+              "api",
+              "tpl",
+              "шаблон"
+            ],
+            [
+              "api",
+              "rabbit",
+              "в очередь"
+            ],
+            [
+              "api",
+              "pg",
+              "журнал"
+            ],
+            [
+              "tpl",
+              "pg",
+              "шаблоны"
+            ],
+            [
+              "rabbit",
+              "mailer",
+              "consume"
+            ],
+            [
+              "rabbit",
+              "sms",
+              "consume"
+            ],
+            [
+              "mailer",
+              "smtp",
+              "SMTP"
+            ],
+            [
+              "sms",
+              "gw",
+              "HTTP"
+            ],
+            [
+              "mailer",
+              "ch",
+              "статистика"
+            ],
+            [
+              "sms",
+              "ch",
+              "статистика"
+            ],
+            [
+              "cleanup",
+              "pg",
+              "удаление"
+            ]
+          ]
+        },
+        {
+          "id": "push",
+          "name": "Push",
+          "icon": "bell",
+          "desc": "Push-уведомления в мобильное приложение.",
+          "components": [
+            {
+              "id": "app",
+              "layer": "entry",
+              "kind": "client",
+              "name": "Мобильное приложение",
+              "tech": "iOS · Android",
+              "desc": "Регистрирует токен устройства.",
+              "sources": [
+                "схема из Confluence"
+              ]
+            },
+            {
+              "id": "api",
+              "layer": "app",
+              "kind": "service",
+              "name": "Push API",
+              "tech": "Go",
+              "desc": "Регистрация устройств и отправка.",
+              "sources": [
+                "Helm-чарты в GitLab",
+                "kubectl get deploy"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/push-api",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                },
+                {
+                  "type": "secret",
+                  "name": "push/fcm-key",
+                  "status": "yes",
+                  "where": "снапшот Vault → doomsday-хранилище (зашифрован)"
+                },
+                {
+                  "type": "secret",
+                  "name": "push/apns-cert",
+                  "status": "yes",
+                  "where": "снапшот Vault → doomsday-хранилище (зашифрован)"
+                }
+              ]
+            },
+            {
+              "id": "redis",
+              "layer": "bus",
+              "kind": "cache",
+              "name": "Кеш токенов",
+              "tech": "Redis",
+              "desc": "Быстрый поиск токенов по клиенту.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "cache",
+                  "name": "tokens:*",
+                  "status": "skip",
+                  "note": "кеш из push_db"
+                }
+              ]
+            },
+            {
+              "id": "kafka",
+              "layer": "bus",
+              "kind": "stream",
+              "name": "Kafka",
+              "tech": "push.events",
+              "desc": "Очередь отправки.",
+              "sources": [
+                "конфиги брокера",
+                "kafka-topics --list"
+              ],
+              "items": [
+                {
+                  "type": "topic",
+                  "name": "push.events",
+                  "size": "хранение 1 день",
+                  "status": "skip",
+                  "note": "транзитные события"
+                }
+              ]
+            },
+            {
+              "id": "sender",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Отправка push",
+              "tech": "Go",
+              "desc": "Отправляет в FCM и APNs.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "config",
+                  "name": "helm/push-sender",
+                  "status": "yes",
+                  "where": "GitLab + архив репозитория в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "stale",
+              "layer": "workers",
+              "kind": "worker",
+              "name": "Чистка токенов",
+              "tech": "Go",
+              "desc": "Удаляет устаревшие токены.",
+              "sources": [
+                "kubectl get cronjobs",
+                "Helm-чарты в GitLab"
+              ],
+              "items": [
+                {
+                  "type": "cron",
+                  "name": "stale-tokens-cleanup",
+                  "status": "yes",
+                  "where": "манифест CronJob в GitLab + архив в doomsday-хранилище"
+                }
+              ]
+            },
+            {
+              "id": "pg",
+              "layer": "data",
+              "kind": "db",
+              "name": "push_db",
+              "tech": "PostgreSQL 16",
+              "desc": "Токены устройств и рассылки.",
+              "sources": [
+                "CMDB",
+                "pg_dump --schema-only / список коллекций"
+              ],
+              "items": [
+                {
+                  "type": "schema",
+                  "name": "push",
+                  "status": "yes",
+                  "where": "дамп push_db → doomsday-хранилище",
+                  "children": [
+                    {
+                      "type": "table",
+                      "name": "device_tokens",
+                      "size": "6 млн строк"
+                    },
+                    {
+                      "type": "table",
+                      "name": "campaigns",
+                      "size": "1 400 строк"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "id": "fcm",
+              "layer": "external",
+              "kind": "external",
+              "name": "FCM",
+              "tech": "Google",
+              "desc": "Доставка на Android.",
+              "sources": [
+                "CMDB"
+              ]
+            },
+            {
+              "id": "apns",
+              "layer": "external",
+              "kind": "external",
+              "name": "APNs",
+              "tech": "Apple",
+              "desc": "Доставка на iOS.",
+              "sources": [
+                "CMDB"
+              ]
+            }
+          ],
+          "links": [
+            [
+              "app",
+              "api",
+              "HTTPS"
+            ],
+            [
+              "api",
+              "redis",
+              "кеш"
+            ],
+            [
+              "api",
+              "pg",
+              "SQL"
+            ],
+            [
+              "api",
+              "kafka",
+              "отправка"
+            ],
+            [
+              "kafka",
+              "sender",
+              "consume"
+            ],
+            [
+              "sender",
+              "fcm",
+              "HTTP/2"
+            ],
+            [
+              "sender",
+              "apns",
+              "HTTP/2"
+            ],
+            [
+              "stale",
+              "pg",
+              "удаление"
+            ]
+          ]
+        }
+      ]
+    }
+  ]
+}

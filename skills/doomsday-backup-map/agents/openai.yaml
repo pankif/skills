@@ -1,0 +1,6 @@
+interface:
+  display_name: "Карта бэкапов судного дня"
+  short_description: "Стек сервиса сверху вниз и что из критичных данных в бэкапе"
+  default_prompt: "Собери карту бэкапов судного дня по этим выгрузкам"
+policy:
+  allow_implicit_invocation: true
