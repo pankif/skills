@@ -27,3 +27,6 @@ jobs:
           python skills/doomsday-backup-map/scripts/build_map.py skills/doomsday-backup-map/assets/example.json -o /tmp/dbm/map.html --quiet
           grep -q '"services"' /tmp/dbm/map.html
           ! grep -q '__MAP_DATA__' /tmp/dbm/map.html
+          cp skills/doomsday-backup-map/assets/example.json /tmp/dbm/data.json
+          printf '{"changes":[{"service":"support","section":"requests","component":"pg","item":"tickets","child":"tickets_archive","status":"skip","was":"no"}]}' > /tmp/dbm/changes.json
+          python skills/doomsday-backup-map/scripts/build_map.py /tmp/dbm/data.json --apply /tmp/dbm/changes.json -o /tmp/dbm/map2.html --quiet | grep -q 'применено 1'

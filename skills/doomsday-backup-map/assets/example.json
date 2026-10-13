@@ -70,8 +70,8 @@
               "id": "sso",
               "layer": "app",
               "kind": "auth",
-              "name": "Keycloak",
-              "tech": "realm support",
+              "name": "Авторизация",
+              "tech": "Keycloak · realm support",
               "desc": "Вход клиентов и операторов, роли.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -90,8 +90,8 @@
               "id": "tickets",
               "layer": "app",
               "kind": "service",
-              "name": "Tickets API",
-              "tech": "Go",
+              "name": "API обращений",
+              "tech": "tickets-api · Go",
               "desc": "Создание и маршрутизация обращений, статусы.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -116,8 +116,8 @@
               "id": "chat",
               "layer": "app",
               "kind": "service",
-              "name": "Chat Gateway",
-              "tech": "Node.js · WebSocket",
+              "name": "Шлюз чата",
+              "tech": "chat-gateway · Node.js",
               "desc": "Живой чат клиента с оператором.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -137,7 +137,7 @@
               "layer": "app",
               "kind": "service",
               "name": "Вложения",
-              "tech": "Go · S3 API",
+              "tech": "files-service · Go",
               "desc": "Загрузка файлов к обращениям.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -162,8 +162,8 @@
               "id": "kafka",
               "layer": "bus",
               "kind": "stream",
-              "name": "Kafka",
-              "tech": "кластер support",
+              "name": "Шина событий",
+              "tech": "Kafka · кластер support",
               "desc": "События тикетов и чата.",
               "sources": [
                 "конфиги брокера",
@@ -190,8 +190,8 @@
               "id": "rabbit",
               "layer": "bus",
               "kind": "queue",
-              "name": "RabbitMQ",
-              "tech": "notifications",
+              "name": "Очередь уведомлений",
+              "tech": "RabbitMQ · notifications",
               "desc": "Очередь на отправку уведомлений.",
               "sources": [
                 "конфиги брокера",
@@ -216,8 +216,8 @@
               "id": "redis",
               "layer": "bus",
               "kind": "cache",
-              "name": "Redis",
-              "tech": "сессии · кеш",
+              "name": "Кеш сессий",
+              "tech": "Redis",
               "desc": "Сессии операторов и присутствие в чате.",
               "sources": [
                 "конфиги брокера",
@@ -236,8 +236,8 @@
               "id": "mail-ingest",
               "layer": "workers",
               "kind": "worker",
-              "name": "Mail ingest",
-              "tech": "IMAP",
+              "name": "Приём писем",
+              "tech": "mail-ingest · IMAP",
               "desc": "Забирает письма из ящика и создаёт тикеты.",
               "sources": [
                 "kubectl get cronjobs",
@@ -256,8 +256,8 @@
               "id": "sla",
               "layer": "workers",
               "kind": "worker",
-              "name": "SLA-движок",
-              "tech": "Go",
+              "name": "Контроль сроков SLA",
+              "tech": "sla-engine · Go",
               "desc": "Таймеры реакции и эскалации.",
               "sources": [
                 "kubectl get cronjobs",
@@ -282,8 +282,8 @@
               "id": "notify",
               "layer": "workers",
               "kind": "worker",
-              "name": "Уведомления",
-              "tech": "email · push",
+              "name": "Уведомления клиенту",
+              "tech": "notify-worker · Go",
               "desc": "Отправляет клиенту ответы и смену статуса.",
               "sources": [
                 "kubectl get cronjobs",
@@ -341,7 +341,7 @@
                       "name": "tickets_archive",
                       "size": "61 млн строк",
                       "status": "no",
-                      "note": "исключена из бэкапа: unlogged"
+                      "note": "нежурналируемая таблица (unlogged), в дамп не попадает"
                     }
                   ]
                 },
@@ -563,12 +563,12 @@
             [
               "kafka",
               "sla",
-              "consume"
+              "чтение"
             ],
             [
               "rabbit",
               "notify",
-              "consume"
+              "чтение"
             ],
             [
               "sla",
@@ -624,8 +624,8 @@
               "id": "kb-api",
               "layer": "app",
               "kind": "service",
-              "name": "KB API",
-              "tech": "Python · FastAPI",
+              "name": "API базы знаний",
+              "tech": "kb-api · Python",
               "desc": "Выдача статей и категорий.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -644,8 +644,8 @@
               "id": "editor-api",
               "layer": "app",
               "kind": "service",
-              "name": "Editor API",
-              "tech": "Python",
+              "name": "API редактора",
+              "tech": "kb-editor · Python",
               "desc": "Черновики, версии, публикация.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -670,8 +670,8 @@
               "id": "search",
               "layer": "app",
               "kind": "service",
-              "name": "Поиск",
-              "tech": "Go",
+              "name": "Поиск по статьям",
+              "tech": "kb-search · Go",
               "desc": "Поиск по статьям с подсказками.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -711,7 +711,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Индексатор",
-              "tech": "Python",
+              "tech": "reindex · Python",
               "desc": "Переиндексация статей каждую ночь.",
               "sources": [
                 "kubectl get cronjobs",
@@ -730,8 +730,8 @@
               "id": "pdf",
               "layer": "workers",
               "kind": "worker",
-              "name": "PDF-версии",
-              "tech": "WeasyPrint",
+              "name": "PDF-версии статей",
+              "tech": "pdf-builder · WeasyPrint",
               "desc": "Собирает PDF статей для печати.",
               "sources": [
                 "kubectl get cronjobs",
@@ -957,9 +957,9 @@
               "items": [
                 {
                   "type": "config",
-                  "name": "/etc/asterisk (dialplan)",
+                  "name": "/etc/asterisk",
                   "status": "no",
-                  "note": "только на сервере"
+                  "note": "диалплан и меню IVR только на сервере"
                 },
                 {
                   "type": "file",
@@ -974,8 +974,8 @@
               "id": "cti",
               "layer": "app",
               "kind": "service",
-              "name": "CTI-коннектор",
-              "tech": "Go · ARI",
+              "name": "Интеграция телефонии",
+              "tech": "cti-connector · Go",
               "desc": "Связывает звонки с тикетами и карточкой клиента.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -994,8 +994,8 @@
               "id": "cb-api",
               "layer": "app",
               "kind": "service",
-              "name": "Callback API",
-              "tech": "Go",
+              "name": "API обратного звонка",
+              "tech": "callback-api · Go",
               "desc": "Принимает заявки на обратный звонок.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -1035,7 +1035,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Выгрузка записей",
-              "tech": "Go",
+              "tech": "recordings-upload · Go",
               "desc": "Переносит записи разговоров с АТС в S3.",
               "sources": [
                 "kubectl get cronjobs",
@@ -1055,7 +1055,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Очистка записей",
-              "tech": "bash",
+              "tech": "скрипт bash на АТС",
               "desc": "Удаляет записи старше 3 лет.",
               "sources": [
                 "kubectl get cronjobs",
@@ -1237,8 +1237,8 @@
               "id": "reviews-api",
               "layer": "app",
               "kind": "service",
-              "name": "Reviews API",
-              "tech": "Kotlin",
+              "name": "API отзывов",
+              "tech": "reviews-api · Kotlin",
               "desc": "Приём и выдача отзывов.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -1263,8 +1263,8 @@
               "id": "mod-api",
               "layer": "app",
               "kind": "service",
-              "name": "Moderation API",
-              "tech": "Kotlin",
+              "name": "API модерации",
+              "tech": "moderation-api · Kotlin",
               "desc": "Решения модераторов, правила, бан-листы.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -1284,7 +1284,7 @@
               "layer": "app",
               "kind": "service",
               "name": "Классификатор токсичности",
-              "tech": "Python · ONNX",
+              "tech": "toxicity-ml · Python",
               "desc": "Оценивает текст до ручной проверки.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -1323,7 +1323,7 @@
               "id": "redis",
               "layer": "bus",
               "kind": "cache",
-              "name": "Rate limit",
+              "name": "Лимиты частоты",
               "tech": "Redis",
               "desc": "Ограничение частоты отзывов.",
               "sources": [
@@ -1344,7 +1344,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Автопубликация",
-              "tech": "Kotlin",
+              "tech": "auto-publish · Kotlin",
               "desc": "Публикует отзывы, прошедшие проверку.",
               "sources": [
                 "kubectl get cronjobs",
@@ -1364,7 +1364,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Пересчёт рейтингов",
-              "tech": "SQL",
+              "tech": "rating-recalc · SQL",
               "desc": "Пересчитывает средние оценки.",
               "sources": [
                 "kubectl get cronjobs",
@@ -1533,8 +1533,8 @@
               "id": "media-api",
               "layer": "app",
               "kind": "service",
-              "name": "Media API",
-              "tech": "Go",
+              "name": "API медиафайлов",
+              "tech": "media-api · Go",
               "desc": "Приём файлов, выдача превью.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -1580,7 +1580,7 @@
               "layer": "app",
               "kind": "service",
               "name": "Классификатор изображений",
-              "tech": "Python",
+              "tech": "image-ml · Python",
               "desc": "Отсеивает недопустимые изображения.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -1599,8 +1599,8 @@
               "id": "kafka",
               "layer": "bus",
               "kind": "stream",
-              "name": "Kafka",
-              "tech": "media.events",
+              "name": "Шина событий",
+              "tech": "Kafka · media.events",
               "desc": "События загрузки и проверки.",
               "sources": [
                 "конфиги брокера",
@@ -1621,7 +1621,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Превью",
-              "tech": "libvips",
+              "tech": "thumbnailer · libvips",
               "desc": "Делает превью разных размеров.",
               "sources": [
                 "kubectl get cronjobs",
@@ -1641,7 +1641,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Очистка отклонённых",
-              "tech": "Go",
+              "tech": "purge-rejected · Go",
               "desc": "Удаляет отклонённые файлы через 30 дней.",
               "sources": [
                 "kubectl get cronjobs",
@@ -1770,7 +1770,7 @@
             [
               "kafka",
               "thumbs",
-              "consume"
+              "чтение"
             ],
             [
               "thumbs",
@@ -1826,8 +1826,8 @@
               "id": "api",
               "layer": "app",
               "kind": "service",
-              "name": "Complaints API",
-              "tech": "Java",
+              "name": "API жалоб",
+              "tech": "complaints-api · Java",
               "desc": "Приём жалоб, статусы, ответы.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -1852,8 +1852,8 @@
               "id": "bpm",
               "layer": "app",
               "kind": "service",
-              "name": "Camunda",
-              "tech": "BPMN 7.20",
+              "name": "Маршрут рассмотрения",
+              "tech": "Camunda 7.20 · BPMN",
               "desc": "Маршрут рассмотрения и сроки.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -1873,7 +1873,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Напоминания о сроках",
-              "tech": "Java",
+              "tech": "deadline-reminders · Java",
               "desc": "Пишет юристам о подходящих сроках.",
               "sources": [
                 "kubectl get cronjobs",
@@ -1893,7 +1893,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Выгрузка в СЭД",
-              "tech": "Java",
+              "tech": "sed-export · Java",
               "desc": "Передаёт закрытые жалобы в документооборот.",
               "sources": [
                 "kubectl get cronjobs",
@@ -2067,7 +2067,7 @@
       "sections": [
         {
           "id": "email-sms",
-          "name": "Email и SMS",
+          "name": "Письма и SMS",
           "icon": "envelope",
           "desc": "Письма и SMS клиентам: готовность результатов, записи, ответы поддержки.",
           "components": [
@@ -2086,8 +2086,8 @@
               "id": "api",
               "layer": "app",
               "kind": "service",
-              "name": "Notify API",
-              "tech": "Go",
+              "name": "API уведомлений",
+              "tech": "notify-api · Go",
               "desc": "Принимает запросы на отправку.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -2106,8 +2106,8 @@
               "id": "tpl",
               "layer": "app",
               "kind": "service",
-              "name": "Шаблоны",
-              "tech": "Go · MJML",
+              "name": "Шаблоны сообщений",
+              "tech": "templates · MJML",
               "desc": "Тексты писем и SMS.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -2126,8 +2126,8 @@
               "id": "rabbit",
               "layer": "bus",
               "kind": "queue",
-              "name": "RabbitMQ",
-              "tech": "notify.*",
+              "name": "Очереди отправки",
+              "tech": "RabbitMQ · notify.*",
               "desc": "Очереди писем и SMS.",
               "sources": [
                 "конфиги брокера",
@@ -2152,8 +2152,8 @@
               "id": "mailer",
               "layer": "workers",
               "kind": "worker",
-              "name": "Отправка email",
-              "tech": "Go",
+              "name": "Отправка писем",
+              "tech": "mailer · Go",
               "desc": "Отправляет письма через SMTP-релей.",
               "sources": [
                 "kubectl get cronjobs",
@@ -2173,7 +2173,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Отправка SMS",
-              "tech": "Go",
+              "tech": "sms-sender · Go",
               "desc": "Отправляет SMS через шлюз оператора.",
               "sources": [
                 "kubectl get cronjobs",
@@ -2193,7 +2193,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Чистка журнала",
-              "tech": "SQL",
+              "tech": "delivery-log-cleanup · SQL",
               "desc": "Удаляет журнал старше 90 дней.",
               "sources": [
                 "kubectl get cronjobs",
@@ -2272,8 +2272,8 @@
               "id": "smtp",
               "layer": "external",
               "kind": "external",
-              "name": "SMTP-релей",
-              "tech": "внешний",
+              "name": "Почтовый релей",
+              "tech": "SMTP · внешний",
               "desc": "Отправка писем наружу.",
               "sources": [
                 "CMDB"
@@ -2320,12 +2320,12 @@
             [
               "rabbit",
               "mailer",
-              "consume"
+              "чтение"
             ],
             [
               "rabbit",
               "sms",
-              "consume"
+              "чтение"
             ],
             [
               "mailer",
@@ -2356,7 +2356,7 @@
         },
         {
           "id": "push",
-          "name": "Push",
+          "name": "Push-уведомления",
           "icon": "bell",
           "desc": "Push-уведомления в мобильное приложение.",
           "components": [
@@ -2375,8 +2375,8 @@
               "id": "api",
               "layer": "app",
               "kind": "service",
-              "name": "Push API",
-              "tech": "Go",
+              "name": "API push-уведомлений",
+              "tech": "push-api · Go",
               "desc": "Регистрация устройств и отправка.",
               "sources": [
                 "Helm-чарты в GitLab",
@@ -2427,8 +2427,8 @@
               "id": "kafka",
               "layer": "bus",
               "kind": "stream",
-              "name": "Kafka",
-              "tech": "push.events",
+              "name": "Очередь отправки",
+              "tech": "Kafka · push.events",
               "desc": "Очередь отправки.",
               "sources": [
                 "конфиги брокера",
@@ -2448,8 +2448,8 @@
               "id": "sender",
               "layer": "workers",
               "kind": "worker",
-              "name": "Отправка push",
-              "tech": "Go",
+              "name": "Отправка push-уведомлений",
+              "tech": "push-sender · Go",
               "desc": "Отправляет в FCM и APNs.",
               "sources": [
                 "kubectl get cronjobs",
@@ -2469,7 +2469,7 @@
               "layer": "workers",
               "kind": "worker",
               "name": "Чистка токенов",
-              "tech": "Go",
+              "tech": "stale-tokens-cleanup · Go",
               "desc": "Удаляет устаревшие токены.",
               "sources": [
                 "kubectl get cronjobs",
@@ -2520,8 +2520,8 @@
               "id": "fcm",
               "layer": "external",
               "kind": "external",
-              "name": "FCM",
-              "tech": "Google",
+              "name": "Доставка на Android",
+              "tech": "FCM · Google",
               "desc": "Доставка на Android.",
               "sources": [
                 "CMDB"
@@ -2531,8 +2531,8 @@
               "id": "apns",
               "layer": "external",
               "kind": "external",
-              "name": "APNs",
-              "tech": "Apple",
+              "name": "Доставка на iOS",
+              "tech": "APNs · Apple",
               "desc": "Доставка на iOS.",
               "sources": [
                 "CMDB"
@@ -2563,7 +2563,7 @@
             [
               "kafka",
               "sender",
-              "consume"
+              "чтение"
             ],
             [
               "sender",
