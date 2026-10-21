@@ -1,0 +1,447 @@
+{
+  "schemaVersion": 1,
+  "defaultView": "overview",
+  "snapshot": {
+    "key": "report-demo",
+    "name": "Подготовка отчётов",
+    "subtitle": "Вымышленный пример",
+    "date": "2026-10-21",
+    "scope": "Учебная реализация в app.py. Внешние render, storage и notify передаются вызывающей стороной. Окружение и способы запуска не описаны.",
+    "note": "Все данные учебные; это пример формата, а не аудит действующей системы.",
+    "repositories": [
+      {
+        "id": "demo",
+        "name": "Учебный сервис",
+        "tech": "Python"
+      }
+    ]
+  },
+  "sources": {
+    "submit": {
+      "repo": "demo",
+      "path": "app.py",
+      "start": 4,
+      "end": 12,
+      "kind": "example"
+    },
+    "access": {
+      "repo": "demo",
+      "path": "app.py",
+      "start": 4,
+      "end": 6,
+      "kind": "example"
+    },
+    "dedup": {
+      "repo": "demo",
+      "path": "app.py",
+      "start": 7,
+      "end": 8,
+      "kind": "example"
+    },
+    "enqueue": {
+      "repo": "demo",
+      "path": "app.py",
+      "start": 9,
+      "end": 12,
+      "kind": "example"
+    },
+    "worker": {
+      "repo": "demo",
+      "path": "app.py",
+      "start": 15,
+      "end": 26,
+      "kind": "example"
+    },
+    "save": {
+      "repo": "demo",
+      "path": "app.py",
+      "start": 19,
+      "end": 22,
+      "kind": "example"
+    },
+    "failure": {
+      "repo": "demo",
+      "path": "app.py",
+      "start": 23,
+      "end": 25,
+      "kind": "example"
+    },
+    "notify": {
+      "repo": "demo",
+      "path": "app.py",
+      "start": 26,
+      "end": 26,
+      "kind": "example"
+    },
+    "status": {
+      "repo": "demo",
+      "path": "app.py",
+      "start": 29,
+      "end": 33,
+      "kind": "example"
+    }
+  },
+  "views": {
+    "overview": {
+      "title": "Как устроена подготовка отчёта",
+      "group": "Система",
+      "layers": [
+        "Запрос",
+        "Подготовка",
+        "Результат"
+      ],
+      "description": "Запрос создаёт отчёт и ставит задание. Обработчик берёт id из той же очереди, сохраняет результат и вызывает notify.",
+      "gaps": "Очередь и reports — переданные коллекции. Фактический запуск обработчика и реализация внешних зависимостей здесь не показаны.",
+      "nodes": [
+        {
+          "id": "request",
+          "title": "Принять запрос",
+          "type": "entry",
+          "row": 0,
+          "col": 0,
+          "description": "Обработчик проверяет доступ и повтор запроса, затем создаёт отчёт.",
+          "source": "submit",
+          "symbol": "submit_report",
+          "scenario": "submit"
+        },
+        {
+          "id": "queue",
+          "title": "Очередь заданий",
+          "type": "event",
+          "row": 0,
+          "col": 1,
+          "description": "В jobs добавляется request_key; process_next снимает первый id.",
+          "source": [
+            "enqueue",
+            "worker"
+          ]
+        },
+        {
+          "id": "worker",
+          "title": "Подготовить отчёт",
+          "type": "service",
+          "row": 1,
+          "col": 1,
+          "description": "Обработчик вызывает render и storage; результат отражает в состоянии отчёта.",
+          "source": "worker",
+          "symbol": "process_next"
+        },
+        {
+          "id": "storage",
+          "title": "Сохранить файл",
+          "type": "data",
+          "row": 1,
+          "col": 2,
+          "description": "storage.put возвращает URL, который записывается в report.",
+          "source": "save",
+          "symbol": "storage.put"
+        },
+        {
+          "id": "status",
+          "title": "Показать состояние",
+          "type": "success",
+          "row": 2,
+          "col": 1,
+          "description": "get_status отдаёт URL только для ready.",
+          "source": "status",
+          "scenario": "status",
+          "symbol": "get_status"
+        },
+        {
+          "id": "delivery",
+          "title": "Внешняя доставка",
+          "type": "external",
+          "row": 2,
+          "col": 2,
+          "description": "Известен вызов notify, дальнейший транспорт не описан.",
+          "source": "notify",
+          "certainty": "unknown",
+          "gap": "Реализация notify отсутствует; результат доставки не установлен."
+        }
+      ],
+      "edges": [
+        {
+          "id": "enqueue",
+          "from": "request",
+          "to": "queue",
+          "label": "добавляет id",
+          "description": "submit_report выполняет jobs.append(request_key).",
+          "source": "enqueue"
+        },
+        {
+          "id": "take",
+          "from": "queue",
+          "to": "worker",
+          "label": "забирает id",
+          "description": "process_next использует jobs.pop(0).",
+          "source": "worker"
+        },
+        {
+          "id": "put",
+          "from": "worker",
+          "to": "storage",
+          "label": "сохраняет",
+          "description": "Внутри try вызывается storage.put(report_id, content).",
+          "source": "save"
+        },
+        {
+          "id": "update",
+          "from": "worker",
+          "to": "status",
+          "label": "меняет состояние",
+          "description": "Обработчик записывает running, затем ready либо failed; get_status читает это поле.",
+          "source": [
+            "worker",
+            "status"
+          ]
+        },
+        {
+          "id": "notify",
+          "from": "worker",
+          "to": "delivery",
+          "label": "вызывает notify",
+          "description": "После успешного try вызывается notify(report[\"url\"]). Дальнейшая доставка не прослежена.",
+          "source": "notify",
+          "certainty": "unknown",
+          "gap": "Подтверждён только вызов интерфейса notify, без сведений о его реализации.",
+          "lane": "right"
+        }
+      ],
+      "related": [
+        "submit",
+        "status"
+      ]
+    },
+    "submit": {
+      "title": "Создание и повтор запроса",
+      "group": "Сценарии",
+      "layers": [
+        "Проверка доступа",
+        "Повтор запроса",
+        "Создание задания"
+      ],
+      "description": "Неактивный пользователь получает отказ. Повторный ключ возвращает существующую запись. Новый ключ создаёт queued-отчёт и задание.",
+      "gaps": "Конкурентные запросы, HTTP-обвязка и долговечность очереди в учебном коде не определены.",
+      "nodes": [
+        {
+          "id": "entry",
+          "title": "Запрос отчёта",
+          "type": "entry",
+          "row": 0,
+          "col": 0,
+          "description": "Вызывается submit_report с user и request_key.",
+          "source": "submit"
+        },
+        {
+          "id": "access",
+          "title": "Пользователь активен?",
+          "type": "decision",
+          "row": 0,
+          "col": 1,
+          "description": "Проверяется user[\"active\"].",
+          "source": "access"
+        },
+        {
+          "id": "denied",
+          "title": "Доступ закрыт",
+          "type": "error",
+          "row": 0,
+          "col": 2,
+          "description": "При false выбрасывается PermissionError до обращения к reports.",
+          "source": "access"
+        },
+        {
+          "id": "existing",
+          "title": "Ключ уже есть?",
+          "type": "decision",
+          "row": 1,
+          "col": 1,
+          "description": "request_key ищется в reports.",
+          "source": "dedup"
+        },
+        {
+          "id": "return",
+          "title": "Вернуть существующий",
+          "type": "success",
+          "row": 1,
+          "col": 2,
+          "description": "Повтор возвращает ту же запись; новое задание не добавляется.",
+          "source": "dedup"
+        },
+        {
+          "id": "create",
+          "title": "Создать queued",
+          "type": "data",
+          "row": 2,
+          "col": 0,
+          "description": "Новый отчёт записывается в reports по request_key.",
+          "source": "enqueue"
+        },
+        {
+          "id": "queue",
+          "title": "Добавить задание",
+          "type": "event",
+          "row": 2,
+          "col": 1,
+          "description": "В jobs добавляется request_key.",
+          "source": "enqueue"
+        },
+        {
+          "id": "done",
+          "title": "Вернуть отчёт",
+          "type": "success",
+          "row": 2,
+          "col": 2,
+          "description": "После постановки обработчик возвращает созданный report.",
+          "source": "enqueue"
+        }
+      ],
+      "edges": [
+        {
+          "id": "start",
+          "from": "entry",
+          "to": "access",
+          "label": "проверить",
+          "description": "Первая ветка обработчика проверяет доступ.",
+          "source": "access"
+        },
+        {
+          "id": "no-access",
+          "from": "access",
+          "to": "denied",
+          "label": "нет",
+          "description": "Неактивному пользователю выбрасывается исключение.",
+          "source": "access"
+        },
+        {
+          "id": "active",
+          "from": "access",
+          "to": "existing",
+          "label": "да",
+          "description": "При активном пользователе код доходит до проверки reports.",
+          "source": [
+            "access",
+            "dedup"
+          ]
+        },
+        {
+          "id": "repeat",
+          "from": "existing",
+          "to": "return",
+          "label": "да",
+          "description": "Найденный ключ возвращается ранним выходом.",
+          "source": "dedup"
+        },
+        {
+          "id": "new",
+          "from": "existing",
+          "to": "create",
+          "label": "нет",
+          "description": "Отсутствующий ключ ведёт к созданию новой записи.",
+          "source": [
+            "dedup",
+            "enqueue"
+          ]
+        },
+        {
+          "id": "publish",
+          "from": "create",
+          "to": "queue",
+          "label": "затем",
+          "description": "Вызов append выполняется после записи reports.",
+          "source": "enqueue"
+        },
+        {
+          "id": "result",
+          "from": "queue",
+          "to": "done",
+          "label": "ответ",
+          "description": "Последняя строка обработчика возвращает report.",
+          "source": "enqueue"
+        }
+      ],
+      "related": [
+        "overview"
+      ]
+    },
+    "status": {
+      "title": "Как читается состояние",
+      "group": "Логика",
+      "layers": [
+        "Чтение",
+        "Решение",
+        "Ответ"
+      ],
+      "description": "Чтение состояния не запускает подготовку: get_status читает уже существующую запись.",
+      "gaps": "Отсутствующий report_id приводит к исключению словаря; обработка этого исключения вызывающей стороной не показана.",
+      "nodes": [
+        {
+          "id": "load",
+          "title": "Прочитать отчёт",
+          "type": "entry",
+          "row": 0,
+          "col": 1,
+          "description": "Запись получается через reports[report_id].",
+          "source": "status"
+        },
+        {
+          "id": "ready",
+          "title": "Состояние ready?",
+          "type": "decision",
+          "row": 1,
+          "col": 1,
+          "description": "Проверяется точное равенство report[\"state\"] значению ready.",
+          "source": "status"
+        },
+        {
+          "id": "url",
+          "title": "Состояние и URL",
+          "type": "success",
+          "row": 2,
+          "col": 0,
+          "description": "Для ready ответ содержит state и url.",
+          "source": "status"
+        },
+        {
+          "id": "state",
+          "title": "Только состояние",
+          "type": "success",
+          "row": 2,
+          "col": 2,
+          "description": "Иначе возвращается только текущее значение state.",
+          "source": "status"
+        }
+      ],
+      "edges": [
+        {
+          "id": "read",
+          "from": "load",
+          "to": "ready",
+          "label": "проверить",
+          "description": "После чтения выполняется условие ready.",
+          "source": "status"
+        },
+        {
+          "id": "ready",
+          "from": "ready",
+          "to": "url",
+          "label": "да",
+          "description": "Ветка ready включает URL в ответ.",
+          "source": "status"
+        },
+        {
+          "id": "other",
+          "from": "ready",
+          "to": "state",
+          "label": "нет",
+          "description": "Остальные состояния возвращаются без URL.",
+          "source": "status"
+        }
+      ],
+      "related": [
+        "overview",
+        "submit"
+      ]
+    }
+  }
+}

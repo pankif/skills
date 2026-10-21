@@ -1,0 +1,6 @@
+interface:
+  display_name: "Карта системы"
+  short_description: "Архитектура, сценарии и логика по исходникам проекта"
+  default_prompt: "Используй $system-map: разберись в этом проекте и собери интерактивную карту архитектуры, сценариев и логики с основаниями для выводов."
+policy:
+  allow_implicit_invocation: true

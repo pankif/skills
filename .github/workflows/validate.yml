@@ -30,3 +30,8 @@ jobs:
           cp skills/doomsday-backup-map/assets/example.json /tmp/dbm/data.json
           printf '{"changes":[{"service":"support","section":"requests","component":"pg","item":"tickets","child":"tickets_archive","status":"skip","was":"no"}]}' > /tmp/dbm/changes.json
           python skills/doomsday-backup-map/scripts/build_map.py /tmp/dbm/data.json --apply /tmp/dbm/changes.json -o /tmp/dbm/map2.html --quiet | grep -q 'применено 1'
+      - name: system-map — проверка сборщика и сборка примера
+        run: |
+          python skills/system-map/scripts/test_build_map.py
+          python skills/system-map/scripts/build_map.py skills/system-map/assets/example.json --root demo=skills/system-map/assets/example-project -o /tmp/system-map/example.html
+          python skills/system-map/scripts/build_map.py /tmp/system-map/example.json --check
