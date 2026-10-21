@@ -1,6 +1,0 @@
-interface:
-  display_name: "Taste skill v2 — дизайн лендингов без «ИИ-шаблона»"
-  short_description: "Арт-дирекция сайта: направление, типографика, палитра, проверка в браузере"
-  default_prompt: "Собери лендинг по taste skill v2: сначала инвентарь и направление, потом сборка, линт и осмотр скриншотов"
-policy:
-  allow_implicit_invocation: true
