@@ -22,6 +22,15 @@ jobs:
           printf 'П1 — Делаем — проверка\nП2 — Обсудить\n' > /tmp/rc/pasted.txt
           python skills/review-checklist/scripts/collect.py /tmp/rc/checkout-review-items.json /tmp/rc/pasted.txt --md /tmp/rc/checkout-review.md
           grep -q 'делаем — 1' /tmp/rc/checkout-review.md
+      - name: design-review-map — сборка примера
+        run: |
+          python skills/design-review-map/scripts/build.py skills/design-review-map/assets/example-spec.json /tmp/drm
+          ! grep -q '__DATA__' /tmp/drm/chatgun-design.html
+          printf 'Э1 Главная: принято\n\nЭ2 Список сценариев: доработать\nТочка 1 (x 30%%, y 22%%): Сдвинуть\n' > /tmp/drm/pasted.txt
+          python skills/design-review-map/scripts/collect.py /tmp/drm/chatgun-design-screens.json /tmp/drm/pasted.txt --md /tmp/drm/chatgun-design.md
+          grep -q 'на доработку 1, принято 1, без решения 3' /tmp/drm/chatgun-design.md
+          python skills/design-review-map/scripts/build.py skills/design-review-map/assets/example-spec.json /tmp/drm-copy --images copy
+          test -f /tmp/drm-copy/chatgun-design-img/05.svg
       - name: doomsday-backup-map — сборка примера
         run: |
           python skills/doomsday-backup-map/scripts/build_map.py skills/doomsday-backup-map/assets/example.json -o /tmp/dbm/map.html --quiet

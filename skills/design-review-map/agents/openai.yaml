@@ -1,0 +1,6 @@
+interface:
+  display_name: "Дизайн-ревью стопкой"
+  short_description: "Свайпы по скриншотам: принять или доработать с точками"
+  default_prompt: "Собери дизайн-ревью экранов стопкой"
+policy:
+  allow_implicit_invocation: true
