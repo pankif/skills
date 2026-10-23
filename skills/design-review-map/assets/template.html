@@ -259,16 +259,8 @@ body.is-done .dock{display:none}
 .ta-w{position:relative;flex:none;margin-top:10px}
 .ta{display:block;width:100%;height:88px;resize:none;padding:8px 16px;border:0;border-radius:var(--r-card);
   background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--chip-b);color:var(--ink);font:400 16px/24px var(--font);-webkit-appearance:none;appearance:none}
-.ta-w.has-mic .ta{padding-right:56px}
 .ta::placeholder{color:var(--muted);opacity:1}
 .ta:focus{outline:none;box-shadow:inset 0 0 0 2.5px var(--accent)}
-.mic{position:absolute;right:6px;bottom:6px;width:40px;height:40px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;
-  background:var(--soft);color:var(--on-soft);transition:transform .14s var(--ease), background-color .2s var(--ease)}
-.mic[hidden]{display:none}
-.mic:active{transform:scale(.92)}
-.mic .ic{font-size:20px}
-.mic[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);animation:micOn 1.3s var(--ease) infinite}
-@keyframes micOn{from{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent)}to{box-shadow:0 0 0 12px color-mix(in srgb, var(--accent) 0%, transparent)}}
 .sh-f{flex:none;display:grid;grid-template-columns:1fr 1.5fr;gap:10px;margin-top:10px}
 .sh-f .btn{height:44px}
 .ph-list{flex:none;display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
@@ -337,7 +329,6 @@ body.is-done .dock{display:none}
   <symbol id="i-more" viewBox="0 0 256 256"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z"/></symbol>
   <symbol id="i-left" viewBox="0 0 256 256"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></symbol>
   <symbol id="i-right" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></symbol>
-  <symbol id="i-mic" viewBox="0 0 256 256"><path d="M128,176a48.05,48.05,0,0,0,48-48V64a48,48,0,0,0-96,0v64A48.05,48.05,0,0,0,128,176ZM96,64a32,32,0,0,1,64,0v64a32,32,0,0,1-64,0Zm40,143.6V240a8,8,0,0,1-16,0V207.6A80.11,80.11,0,0,1,48,128a8,8,0,0,1,16,0,64,64,0,0,0,128,0,8,8,0,0,1,16,0A80.11,80.11,0,0,1,136,207.6Z"/></symbol>
   <symbol id="i-trash" viewBox="0 0 256 256"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></symbol>
   <symbol id="i-zoom" viewBox="0 0 256 256"><path d="M152,112a8,8,0,0,1-8,8H120v24a8,8,0,0,1-16,0V120H80a8,8,0,0,1,0-16h24V80a8,8,0,0,1,16,0v24h24A8,8,0,0,1,152,112Zm77.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88.11,88.11,0,1,1,11.31-11.31l50.07,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z"/></symbol>
   <symbol id="i-x" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></symbol>
@@ -404,7 +395,6 @@ body.is-done .dock{display:none}
       </div>
       <div class="ta-w" id="taW">
         <textarea class="ta" id="rwTa" rows="3" enterkeyhint="send" placeholder="Что поправить на экране" aria-label="Заметка ко всему экрану"></textarea>
-        <button type="button" class="mic" id="micBtn" hidden aria-pressed="false" aria-label="Диктовать" title="Диктовать"><svg class="ic" aria-hidden="true"><use href="#i-mic"/></svg></button>
       </div>
       <div class="sh-f">
         <button type="button" class="btn btn-line" data-rw="cancel">Отмена</button>
@@ -767,7 +757,7 @@ function toggleMenu(){ var m = $('#menu'); m.hidden = !m.hidden; $('#moreBtn').s
 
 /* ---------- доработка ---------- */
 var rw = $('#rw'), rwBg = $('#rwBg'), rwFit = $('#rwFit'), rwFrame = $('#rwFrame'), rwZoom = $('#rwZoom'), rwImg = $('#rwImg'), rwPins = $('#rwPins');
-var rwSheet = $('#rwSheet'), rwTa = $('#rwTa'), tgList = $('#tgList'), phList = $('#phList'), micBtn = $('#micBtn');
+var rwSheet = $('#rwSheet'), rwTa = $('#rwTa'), tgList = $('#tgList'), phList = $('#phList');
 var BG = [$('#hd'), $('#main'), $('#dock')];
 var RW = {on:false, id:null, d:null, snap:null, t:-1, p:0, q:0, sp:null, from:null, src:null, busy:false};
 RW.commit = function(){ var d = RW.d; st.dec[RW.id] = {s:d.s, c:d.c, tags:d.tags, ph:d.ph, pins:d.pins}; persist(RW.id); };
@@ -834,14 +824,15 @@ RW.open = function(id, vx, src){
   RW.from = RW.fromRect(RW.tall ? null : src);
   if (src) src.style.visibility = 'hidden';
   RW.p = 0; RW.render();
-  /* поле сразу в фокусе: на телефоне открывается клавиатура с её микрофоном. Фокус только здесь, в обработчике нажатия, иначе iOS не покажет клавиатуру */
+  /* поле сразу в фокусе: на телефоне открывается клавиатура, диктуют её микрофоном (у страницы артефакта доступа к микрофону нет).
+     Фокус только здесь, в обработчике нажатия, иначе iOS не покажет клавиатуру */
   RW.focus();
   RW.anim(1, vx, function(){ if (S.top && S.top.dataset.card === id && !S.sx) { S.x = 0; S.render(); } });
   if (S.top && S.top.dataset.card === id) setTimeout(function(){ if (RW.on && !S.sx) { S.x = 0; S.render(); } }, 160);
 };
 RW.close = function(){
   if (RW.sp) { RW.sp.stop(); RW.sp = null; }
-  MIC.stop(); if (document.activeElement === rwTa) rwTa.blur();
+  if (document.activeElement === rwTa) rwTa.blur();
   RW.on = false; RW.busy = false;
   rw.hidden = true;
   rwFrame.style.transform = ''; rwSheet.style.transform = ''; rwSheet.style.opacity = '';
@@ -852,7 +843,6 @@ RW.close = function(){
 };
 RW.cancel = function(){
   if (!RW.on || RW.busy) return;
-  MIC.stop();
   var id = RW.id;
   if (RW.snap) st.dec[id] = JSON.parse(RW.snap); else delete st.dec[id];
   persist(id, true); RW.busy = true;
@@ -865,7 +855,7 @@ RW.cancel = function(){
 RW.send = function(){
   if (!RW.on || RW.busy) return;
   var id = RW.id, snap = RW.snap;
-  MIC.stop(); rwTa.blur();
+  rwTa.blur();
   RW.d.s = 'fix'; RW.commit(); persist(id, true); RW.busy = true;
   if (RW.src) { RW.src.style.visibility = ''; RW.src = null; }
   if (!RW.tall) RZ.reset();
@@ -894,7 +884,7 @@ RW.paint = function(pop){
 };
 function chipsHTML(list, sel, kind){ return list.map(function(x){ return '<button type="button" class="chip" data-' + kind + '="' + esc(x) + '" aria-pressed="' + (sel.indexOf(x) >= 0) + '">' + esc(x) + '</button>'; }).join(''); }
 RW.focus = function(){ rwTa.focus({preventScroll:true}); var n = rwTa.value.length; try { rwTa.setSelectionRange(n, n); } catch (e) {} };
-RW.select = function(k){ MIC.stop(); RW.t = k; RW.paint(); RW.focus(); };
+RW.select = function(k){ RW.t = k; RW.paint(); RW.focus(); };
 RW.addPin = function(e){
   if (!RW.on || RW.busy) return;
   var r = rwZoom.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
@@ -904,17 +894,15 @@ RW.addPin = function(e){
   if (hit >= 0) { RW.select(hit); return; }
   if (RW.d.pins.length >= MAXP) { toastMsg('Не больше ' + MAXP + ' точек на экран'); return; }
   RW.d.pins.push({x:+clamp(x, 0, 1).toFixed(4), y:+clamp(y, 0, 1).toFixed(4), t:'', ph:[]});
-  MIC.stop(); RW.t = RW.d.pins.length - 1; RW.commit(); RW.paint(RW.t); RW.focus();
+  RW.t = RW.d.pins.length - 1; RW.commit(); RW.paint(RW.t); RW.focus();
 };
 RW.delPin = function(){
   var t = RW.t; if (t < 0) return;
-  MIC.stop(); RW.d.pins.splice(t, 1); RW.t = RW.d.pins.length ? Math.max(0, t - 1) : -1; RW.commit(); RW.paint();
+  RW.d.pins.splice(t, 1); RW.t = RW.d.pins.length ? Math.max(0, t - 1) : -1; RW.commit(); RW.paint();
 };
 RW.toggle = function(list, v, b){ var k = list.indexOf(v); if (k >= 0) list.splice(k, 1); else list.push(v); b.setAttribute('aria-pressed', String(k < 0)); RW.commit(); };
 RW.input = function(){ if (!RW.on) return; if (RW.t < 0) RW.d.c = rwTa.value; else if (RW.d.pins[RW.t]) RW.d.pins[RW.t].t = rwTa.value; RW.commit(); };
 rwTa.addEventListener('input', RW.input);
-/* начали печатать во время диктовки: диктовка останавливается, её поздний текст не перепишет набранное */
-rwTa.addEventListener('keydown', function(e){ if (MIC.r && e.key && e.key.length === 1) MIC.stop(); });
 rwFrame.addEventListener('click', function(e){ RW.addPin(e); });
 var COARSE = window.matchMedia && matchMedia('(pointer: coarse)').matches;
 $('#rwHint').textContent = COARSE ? 'Нажатие на макет ставит точку, щипок увеличивает' : 'Клик по макету ставит точку, колесо мыши увеличивает';
@@ -922,51 +910,6 @@ var RZ = Zoom({box:rwFit, frame:rwFrame, layer:rwZoom,
   active:function(){ return RW.on && !RW.busy; },
   onChange:function(z){ $('#rwUnzoom').hidden = z.s <= 1.001; }});
 
-/* ---------- диктовка ---------- */
-/* Распознаёт браузер: Chrome, Edge, Safari. Где микрофон не дают (браузер, настройки, рамка приложения),
-   кнопка прячется и остаётся микрофон клавиатуры: поле уже в фокусе, клавиатура открыта. */
-var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-var MIC = {r:null, late:null, base:'', t:-1, off:!SR};
-try { if (localStorage.getItem('drm-mic') === 'off') MIC.off = true; } catch (e) {}
-MIC.show = function(){ micBtn.hidden = MIC.off; $('#taW').classList.toggle('has-mic', !MIC.off); };
-MIC.set = function(on){ var l = on ? 'Остановить диктовку' : 'Диктовать'; micBtn.setAttribute('aria-pressed', String(on)); micBtn.setAttribute('aria-label', l); micBtn.title = l; };
-/* в части браузеров каждый следующий кусок повторяет предыдущие: склеиваем без повторов */
-MIC.join = function(res){
-  var s = '';
-  for (var i = 0; i < res.length; i++) {
-    var t = String(res[i][0] && res[i][0].transcript || '').trim(); if (!t) continue;
-    if (s && t.toLowerCase().indexOf(s.toLowerCase()) === 0) s = t; else s = s ? s + ' ' + t : t;
-  }
-  return s;
-};
-MIC.start = function(){
-  if (MIC.r || MIC.off || !RW.on) return;
-  var r; try { r = new SR(); } catch (e) { MIC.fail(); return; }
-  r.lang = 'ru-RU'; r.continuous = true; r.interimResults = true;
-  MIC.t = RW.t; MIC.base = rwTa.value.replace(/\s+$/, '');
-  r.onresult = function(e){
-    if ((MIC.r !== r && MIC.late !== r) || !RW.on || RW.t !== MIC.t) return;
-    var s = MIC.join(e.results); if (!s) return;
-    if (!MIC.base || /[.!?]$/.test(MIC.base)) s = s.charAt(0).toUpperCase() + s.slice(1);
-    rwTa.value = MIC.base ? MIC.base + ' ' + s : s; RW.input();
-    rwTa.scrollTop = rwTa.scrollHeight;
-  };
-  r.onerror = function(e){ if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture') MIC.fail(true); };
-  r.onend = function(){ if (MIC.r === r) { MIC.r = null; MIC.set(false); } };
-  MIC.r = r; MIC.late = null; MIC.set(true);
-  /* на телефоне клавиатура при диктовке не нужна: видно макет, поле и фразы */
-  if (COARSE && document.activeElement === rwTa) rwTa.blur();
-  try { r.start(); } catch (e) { MIC.r = null; MIC.set(false); MIC.fail(); }
-};
-/* keep: остановили кнопкой, последний распознанный кусок ещё допишется */
-MIC.stop = function(keep){ var r = MIC.r; MIC.late = keep ? r : null; if (!r) return; MIC.r = null; MIC.set(false); try { r.stop(); } catch (e) {} };
-MIC.toggle = function(){ if (MIC.r) MIC.stop(true); else MIC.start(); };
-MIC.fail = function(remember){
-  MIC.stop(); MIC.off = true; MIC.show();
-  if (remember) { try { localStorage.setItem('drm-mic', 'off'); } catch (e) {} }
-  toastMsg('Микрофон недоступен, диктуйте с клавиатуры');
-};
-MIC.show();
 
 /* ---------- просмотр скриншота на весь экран ---------- */
 var vw = $('#vw'), vwBg = $('#vwBg'), vwFit = $('#vwFit'), vwFrame = $('#vwFrame'), vwTop = $('#vwTop'), vwBar = $('#vwBar');
@@ -1067,7 +1010,6 @@ document.addEventListener('click', function(e){
   if ((b = t.closest('[data-ph]'))) { RW.toggle(RW.t < 0 ? RW.d.ph : RW.d.pins[RW.t].ph, b.dataset.ph, b); return; }
   if ((b = t.closest('[data-tag]'))) { RW.toggle(RW.d.tags, b.dataset.tag, b); return; }
   if ((b = t.closest('#pinDel'))) { RW.delPin(); return; }
-  if ((b = t.closest('#micBtn'))) { MIC.toggle(); return; }
   if ((b = t.closest('[data-rw]'))) { if (b.dataset.rw === 'send') RW.send(); else RW.cancel(); return; }
 });
 document.addEventListener('keydown', function(e){
