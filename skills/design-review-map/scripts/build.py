@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 PHRASES = ['Крупнее', 'Мельче', 'Сдвинуть', 'Выровнять', 'Другой цвет', 'Убрать', 'Опечатка', 'Не по сетке']
-TAGS = ['Отступы', 'Цвета', 'Шрифты', 'Тексты', 'Иконки', 'Выравнивание', 'Состояния']
+TAGS = []  # темы ко всему экрану: по умолчанию нет, о чём заметка, видно из текста
 MIME = {'.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif',
         '.webp': 'image/webp', '.svg': 'image/svg+xml', '.avif': 'image/avif'}
 WARN_MB, MAX_MB = 8, 15

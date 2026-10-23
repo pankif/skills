@@ -190,15 +190,16 @@ button{font:inherit;color:inherit}
 body.is-done .dock{display:none}
 
 /* ---------- тост ---------- */
-.toast{position:fixed;z-index:70;left:var(--gl);right:var(--gr);bottom:calc(76px + var(--sab));height:48px;
-  display:flex;align-items:center;gap:8px;padding:0 6px 0 20px;border-radius:var(--r-pill);
+.toast{position:fixed;z-index:70;left:var(--gl);right:var(--gr);bottom:calc(76px + var(--sab));min-height:48px;
+  display:flex;align-items:center;gap:8px;padding:4px 6px 4px 20px;border-radius:var(--r-pill);
   background:var(--toast-bg);color:var(--toast-ink);border:1px solid var(--toast-b);box-shadow:var(--sh-pop);
   font:600 15px/1.2 var(--font);opacity:0;transform:translateY(10px) scale(.98);pointer-events:none;
   transition:opacity .2s var(--ease), transform .26s var(--ease)}
 .toast.show{opacity:1;transform:none;pointer-events:auto}
-.toast-t{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.toast-t{flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .toast .btn{height:38px;padding:0 16px;color:var(--toast-act);font-size:15px}
 .toast .btn:hover{background:rgba(201,197,218,.14)}
+.toast .btn[hidden]{display:none}
 
 /* ---------- итоги ---------- */
 .done-w{position:absolute;inset:0;overflow-y:auto;overscroll-behavior:contain;padding:8px var(--gr) calc(24px + var(--sab)) var(--gl)}
@@ -230,63 +231,51 @@ body.is-done .dock{display:none}
 .rw{position:fixed;z-index:50;left:0;right:0;top:0;bottom:0;height:100vh;height:100dvh;height:var(--vvh,100dvh);transform:translateY(var(--vvt,0px));overflow:hidden;overscroll-behavior:none}
 .rw[hidden]{display:none}
 .rw-bg{position:absolute;inset:0;background:var(--bg);opacity:0}
-.rw-stage{position:absolute;left:0;right:0;top:0;height:54%;padding:calc(var(--sat) + 12px) var(--gr) 0 var(--gl);display:flex;flex-direction:column;transition:opacity .2s var(--ease)}
+/* скриншот сверху; его высота не зависит от клавиатуры, поэтому поле всегда в верхней половине экрана */
+.rw{--shot-h:clamp(132px, 25vh, 280px)}
+.rw-stage{position:absolute;left:0;right:0;top:0;height:calc(var(--sat) + 12px + var(--shot-h));padding:calc(var(--sat) + 12px) var(--gr) 0 var(--gl);display:flex;flex-direction:column}
 .rw-fit{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;touch-action:none}
 .rw-fit.zoomed{overflow:hidden;border-radius:var(--r-in)}
 .rw-frame{position:relative;flex:none;cursor:crosshair;transform-origin:50% 50%;will-change:transform}
-.rw-head{flex:none;height:40px;margin:0;display:flex;align-items:center;justify-content:center;gap:10px;font:600 14px/1.25 var(--font);color:var(--muted);text-align:center}
-.rw-head .code{height:26px;font-size:13px}
-.rw-head [hidden]{display:none}
+.rw-unzoom{position:absolute;z-index:2;top:calc(var(--sat) + 20px);right:calc(var(--gr) + 8px);background:var(--popup);box-shadow:inset 0 0 0 1.5px var(--chip-b), var(--sh-pop)}
+.rw-unzoom[hidden]{display:none}
 .btn-sm{height:32px;padding:0 14px;font-size:14px}
-.rw-sheet{position:absolute;left:0;right:0;bottom:0;top:54%;display:flex;flex-direction:column;will-change:transform}
-.sh-in{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;background:var(--surface);border-top:1px solid var(--border);border-radius:var(--r-card) var(--r-card) 0 0;box-shadow:var(--sh-sheet);
-  padding:12px var(--gr) calc(12px + var(--sab)) var(--gl);transition:transform .24s var(--ease), opacity .2s var(--ease)}
+.rw-sheet{position:absolute;left:0;right:0;bottom:0;top:calc(var(--sat) + 12px + var(--shot-h));display:flex;flex-direction:column;will-change:transform}
+.sh-in{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;padding:12px var(--gr) calc(16px + var(--sab)) var(--gl)}
 .sh-h{display:none}
-.tg-list{flex:none;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:5px;margin:-5px}
+.tg-row{flex:none;display:flex;align-items:center;gap:10px;min-height:40px}
+.tg-list{flex:0 1 auto;min-width:0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:5px;margin:-5px}
 .tg-list::-webkit-scrollbar{display:none}
-.tg{appearance:none;flex:none;height:48px;min-width:48px;padding:0 18px;border:0;border-radius:var(--r-pill);cursor:pointer;
-  background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--chip-b);color:var(--ink);font:700 16px/1 var(--font);transition:transform .14s var(--ease)}
+.tg{appearance:none;flex:none;height:40px;min-width:40px;padding:0 16px;border:0;border-radius:var(--r-pill);cursor:pointer;
+  background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--chip-b);color:var(--ink);font:700 15px/1 var(--font);transition:transform .14s var(--ease)}
 .tg:active,.chip:active{transform:scale(.95)}
 .tg[aria-pressed="true"]{background:var(--soft);color:var(--on-soft);box-shadow:inset 0 0 0 2.5px var(--accent)}
-.tg-n{padding:0;width:48px;background:var(--pin);color:var(--pin-ink);box-shadow:none}
-.tg-n[aria-pressed="true"]{background:var(--pin);color:var(--pin-ink);box-shadow:0 0 0 3px var(--surface), 0 0 0 5.5px var(--accent)}
-.sh-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;margin-top:6px;padding-top:4px;padding-bottom:2px}
-.grp-l{margin:0 0 8px;font:600 14px/20px var(--font);color:var(--muted)}
-.chips{display:flex;flex-wrap:wrap;gap:8px}
-#g2W{margin-top:16px}
-#g2W[hidden]{display:none}
-.chip{appearance:none;height:48px;padding:0 15px;border:0;border-radius:var(--r-pill);cursor:pointer;
-  background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--chip-b);color:var(--ink);font:600 16px/1 var(--font);transition:transform .14s var(--ease)}
-.chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:none}
-.tx-row{display:flex;gap:8px;margin-top:8px;align-items:center}
-.tx-btn{min-width:0;max-width:100%;justify-content:flex-start;padding:0 20px 0 16px;flex:0 1 auto}
-.tx-btn span{min-width:0;overflow:hidden;text-overflow:ellipsis}
-#pinDel{margin-left:auto;flex:none;color:var(--muted)}
+.tg-n{padding:0;width:40px;background:var(--pin);color:var(--pin-ink);box-shadow:none}
+.tg-n[aria-pressed="true"]{background:var(--pin);color:var(--pin-ink);box-shadow:0 0 0 3px var(--bg), 0 0 0 5.5px var(--accent)}
+.tg-hint{flex:1;min-width:0;margin:0;font:500 13px/16px var(--font);color:var(--muted)}
+.tg-hint[hidden]{display:none}
+#pinDel{margin-left:auto;flex:none;width:40px;height:40px;color:var(--muted)}
 #pinDel[hidden]{display:none}
-/* под шторкой есть ещё чипсы: линия над кнопками показывает, что список прокручивается */
-.sh-f{flex:none;display:grid;grid-template-columns:1fr 1.5fr;gap:10px;margin-top:2px;padding-top:8px;border-top:1px solid transparent}
-.sh-in.more .sh-f{border-top-color:var(--border)}
-
-/* окно текста: сверху экрана, кроп над полем */
-.rw-text{position:absolute;left:var(--gl);right:var(--gr);top:calc(var(--sat) + 12px);display:flex;flex-direction:column}
-.rw-text[hidden]{display:none}
-.rw-text:not([hidden]){animation:txIn .26s var(--ease)}
-@keyframes txIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
-.crop{position:relative;height:168px;border-radius:var(--r-card);overflow:hidden;background:var(--shot-bg);box-shadow:inset 0 0 0 1px var(--border)}
-.crop::after{content:'';position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px var(--line);pointer-events:none}
-.crop-in{position:absolute;left:0;top:0}
-.crop-in>img{display:block;width:100%;height:100%}
-.tx-sum{margin:12px 0 0;min-height:28px;display:flex;align-items:center;gap:10px;font:600 15px/1.3 var(--font);color:var(--ink2)}
-.tx-sum .pin{position:static;margin:0;flex:none;transform:none}
-.tx-sum span:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.tx-l{margin-top:10px;font:700 15px/20px var(--font);color:var(--ink)}
-.tx-l small{font:400 14px/20px var(--font);color:var(--muted);margin-left:6px}
-.ta{margin-top:8px;display:block;width:100%;height:100px;resize:none;padding:12px 18px;border:0;border-radius:var(--r-card);
+.ta-w{position:relative;flex:none;margin-top:10px}
+.ta{display:block;width:100%;height:88px;resize:none;padding:8px 16px;border:0;border-radius:var(--r-card);
   background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--chip-b);color:var(--ink);font:400 16px/24px var(--font);-webkit-appearance:none;appearance:none}
+.ta-w.has-mic .ta{padding-right:56px}
 .ta::placeholder{color:var(--muted);opacity:1}
 .ta:focus{outline:none;box-shadow:inset 0 0 0 2.5px var(--accent)}
-.tx-f{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
-.tx-f .btn{min-width:132px}
+.mic{position:absolute;right:6px;bottom:6px;width:40px;height:40px;padding:0;border:0;border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  background:var(--soft);color:var(--on-soft);transition:transform .14s var(--ease), background-color .2s var(--ease)}
+.mic[hidden]{display:none}
+.mic:active{transform:scale(.92)}
+.mic .ic{font-size:20px}
+.mic[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);animation:micOn 1.3s var(--ease) infinite}
+@keyframes micOn{from{box-shadow:0 0 0 0 color-mix(in srgb, var(--accent) 45%, transparent)}to{box-shadow:0 0 0 12px color-mix(in srgb, var(--accent) 0%, transparent)}}
+.sh-f{flex:none;display:grid;grid-template-columns:1fr 1.5fr;gap:10px;margin-top:10px}
+.sh-f .btn{height:44px}
+.ph-list{flex:none;display:flex;flex-wrap:wrap;gap:6px;margin-top:16px}
+.ph-list[hidden]{display:none}
+.chip{appearance:none;height:36px;padding:0 13px;border:0;border-radius:var(--r-pill);cursor:pointer;
+  background:var(--surface);box-shadow:inset 0 0 0 1.5px var(--chip-b);color:var(--ink2);font:600 14px/1 var(--font);transition:transform .14s var(--ease)}
+.chip[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);box-shadow:none}
 
 /* ---------- просмотр скриншота на весь экран ---------- */
 .vw{position:fixed;z-index:60;inset:0;height:100vh;height:100dvh;overflow:hidden;overscroll-behavior:none}
@@ -305,14 +294,6 @@ body.is-done .dock{display:none}
 .vw-bar .btn{height:44px;padding:0 16px;font-size:15px}
 .vw-bar .btn-icon{width:44px;padding:0}
 .vw-bar .btn-icon .ic{font-size:20px}
-
-/* набор текста: шторка с чипсами уходит */
-.rw.typing .rw-sheet{visibility:hidden;transition:visibility 0s .24s}
-.rw.typing .sh-in{opacity:0;transform:translateY(32px)}
-
-@media (max-width:899px){
-  .rw.typing .rw-stage{opacity:0;visibility:hidden;transition:opacity .16s var(--ease), visibility 0s .16s}
-}
 
 /* ---------- широкий экран ---------- */
 @media (min-width:900px){
@@ -334,28 +315,17 @@ body.is-done .dock{display:none}
   .rw-fit{flex:none}
   .vw-bar{bottom:calc(24px + var(--sab))}
   .rw-sheet{right:auto;top:24px;bottom:auto;width:424px;max-height:calc(100% - 48px)}
-  .sh-in{flex:0 1 auto;border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--sh-pop);padding:24px}
-  .sh-h{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+  .rw-unzoom{top:32px;right:8px}
+  .sh-in{flex:0 1 auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--sh-pop);padding:24px}
+  .sh-h{display:flex;align-items:center;gap:10px;margin-bottom:16px}
   .sh-h h2{margin:0;font:700 19px/1.3 var(--font);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .sh-body{margin-top:14px;flex:0 1 auto}
-  .tx-row{margin-top:14px}
-  .rw-head .code{display:none}
-  .rw-text{right:auto;top:24px;width:424px;padding:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--sh-pop)}
-  .crop{height:200px;border-radius:var(--r-in)}
+  .tg-n[aria-pressed="true"]{box-shadow:0 0 0 3px var(--surface), 0 0 0 5.5px var(--accent)}
+  .ta{height:128px}
 }
 @media (max-width:374px){
   .hd-t{font-size:16px}
   .bar{width:72px}
-  .chip{padding:0 12px;font-size:15px}
-}
-/* невысокий экран: макет чуть меньше, подпись группы уходит в доступное имя, выбор точки служит заголовком */
-@media (max-width:899px) and (max-height:799px){
-  .rw-stage{height:50%}
-  .rw-sheet{top:50%}
-  #g1L{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;margin:0}
-}
-@media (max-width:899px) and (max-height:700px){
-  .crop{height:132px}
+  .chip{padding:0 11px}
 }
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{animation:none!important;transition:none!important}
@@ -367,7 +337,7 @@ body.is-done .dock{display:none}
   <symbol id="i-more" viewBox="0 0 256 256"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z"/></symbol>
   <symbol id="i-left" viewBox="0 0 256 256"><path d="M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z"/></symbol>
   <symbol id="i-right" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></symbol>
-  <symbol id="i-pencil" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"/></symbol>
+  <symbol id="i-mic" viewBox="0 0 256 256"><path d="M128,176a48.05,48.05,0,0,0,48-48V64a48,48,0,0,0-96,0v64A48.05,48.05,0,0,0,128,176ZM96,64a32,32,0,0,1,64,0v64a32,32,0,0,1-64,0Zm40,143.6V240a8,8,0,0,1-16,0V207.6A80.11,80.11,0,0,1,48,128a8,8,0,0,1,16,0,64,64,0,0,0,128,0,8,8,0,0,1,16,0A80.11,80.11,0,0,1,136,207.6Z"/></symbol>
   <symbol id="i-trash" viewBox="0 0 256 256"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></symbol>
   <symbol id="i-zoom" viewBox="0 0 256 256"><path d="M152,112a8,8,0,0,1-8,8H120v24a8,8,0,0,1-16,0V120H80a8,8,0,0,1,0-16h24V80a8,8,0,0,1,16,0v24h24A8,8,0,0,1,152,112Zm77.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88.11,88.11,0,1,1,11.31-11.31l50.07,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z"/></symbol>
   <symbol id="i-x" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></symbol>
@@ -422,33 +392,26 @@ body.is-done .dock{display:none}
     <div class="rw-fit" id="rwFit">
       <div class="rw-frame" id="rwFrame"><div class="zl" id="rwZoom"><img id="rwImg" alt="" draggable="false"><span class="pins" id="rwPins"></span></div></div>
     </div>
-    <p class="rw-head" id="rwHead"><span class="code" id="rwCode">Э1</span><span id="rwHint">Нажатие на макет ставит точку</span><button type="button" class="btn btn-line btn-sm" id="rwUnzoom" hidden>Вписать</button></p>
+    <button type="button" class="btn btn-sm rw-unzoom" id="rwUnzoom" hidden>Вписать</button>
   </div>
   <section class="rw-sheet" id="rwSheet" aria-label="Что доработать">
     <div class="sh-in">
       <div class="sh-h"><span class="code" id="rwCode2">Э1</span><h2 id="rwTitle">Экран</h2></div>
-      <div class="tg-list" id="tgList" role="group" aria-label="К чему относится заметка"></div>
-      <div class="sh-body" id="shBody">
-        <p class="grp-l" id="g1L">Что не так на экране</p>
-        <div class="chips" id="g1" role="group" aria-labelledby="g1L"></div>
-        <div class="tx-row">
-          <button type="button" class="btn btn-soft tx-btn" id="txBtn"><svg class="ic" aria-hidden="true"><use href="#i-pencil"/></svg><span id="txBtnL">Добавить текст</span></button>
-          <button type="button" class="btn btn-line btn-icon" id="pinDel" aria-label="Удалить точку" title="Удалить точку"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg></button>
-        </div>
-        <div id="g2W"><p class="grp-l" id="g2L">Фразы ко всему экрану</p><div class="chips" id="g2" role="group" aria-labelledby="g2L"></div></div>
+      <div class="tg-row">
+        <div class="tg-list" id="tgList" role="group" aria-label="К чему относится заметка"></div>
+        <p class="tg-hint" id="rwHint">Нажатие на макет ставит точку</p>
+        <button type="button" class="btn btn-line btn-icon" id="pinDel" hidden aria-label="Удалить точку" title="Удалить точку"><svg class="ic" aria-hidden="true"><use href="#i-trash"/></svg></button>
+      </div>
+      <div class="ta-w" id="taW">
+        <textarea class="ta" id="rwTa" rows="3" enterkeyhint="send" placeholder="Что поправить на экране" aria-label="Заметка ко всему экрану"></textarea>
+        <button type="button" class="mic" id="micBtn" hidden aria-pressed="false" aria-label="Диктовать" title="Диктовать"><svg class="ic" aria-hidden="true"><use href="#i-mic"/></svg></button>
       </div>
       <div class="sh-f">
         <button type="button" class="btn btn-line" data-rw="cancel">Отмена</button>
-        <button type="button" class="btn btn-primary" data-rw="send" title="Ctrl + Enter">Отправить</button>
+        <button type="button" class="btn btn-primary" data-rw="send" title="Enter">Отправить</button>
       </div>
+      <div class="ph-list" id="phList" role="group" aria-label="Готовые фразы"></div>
     </div>
-  </section>
-  <section class="rw-text" id="rwText" hidden aria-label="Текст заметки">
-    <div class="crop" id="crop"><div class="crop-in" id="cropIn"><img id="cropImg" alt=""><span class="pins" id="cropPins"></span></div></div>
-    <p class="tx-sum" id="txSum"></p>
-    <label class="tx-l" for="rwTa" id="txL">Текст</label>
-    <textarea class="ta" id="rwTa" rows="3" placeholder="Например: подпись ближе к карточке"></textarea>
-    <div class="tx-f"><button type="button" class="btn btn-primary" data-tx="done">Готово</button></div>
   </section>
 </div>
 
@@ -803,17 +766,17 @@ function closeMenu(){ var m = $('#menu'); if (!m.hidden) { m.hidden = true; $('#
 function toggleMenu(){ var m = $('#menu'); m.hidden = !m.hidden; $('#moreBtn').setAttribute('aria-expanded', String(!m.hidden)); if (!m.hidden) m.querySelector('.mi').focus({preventScroll:true}); }
 
 /* ---------- доработка ---------- */
-var rw = $('#rw'), rwBg = $('#rwBg'), rwFit = $('#rwFit'), rwFrame = $('#rwFrame'), rwZoom = $('#rwZoom'), rwImg = $('#rwImg'), rwPins = $('#rwPins'), rwHead = $('#rwHead');
-var rwSheet = $('#rwSheet'), rwText = $('#rwText'), rwTa = $('#rwTa'), shBody = $('#shBody'), tgList = $('#tgList');
+var rw = $('#rw'), rwBg = $('#rwBg'), rwFit = $('#rwFit'), rwFrame = $('#rwFrame'), rwZoom = $('#rwZoom'), rwImg = $('#rwImg'), rwPins = $('#rwPins');
+var rwSheet = $('#rwSheet'), rwTa = $('#rwTa'), tgList = $('#tgList'), phList = $('#phList'), micBtn = $('#micBtn');
 var BG = [$('#hd'), $('#main'), $('#dock')];
-var RW = {on:false, id:null, d:null, snap:null, t:-1, typing:false, p:0, q:0, sp:null, from:null, src:null, busy:false};
+var RW = {on:false, id:null, d:null, snap:null, t:-1, p:0, q:0, sp:null, from:null, src:null, busy:false};
 RW.commit = function(){ var d = RW.d; st.dec[RW.id] = {s:d.s, c:d.c, tags:d.tags, ph:d.ph, pins:d.pins}; persist(RW.id); };
 RW.layout = function(){
   var it = byId[RW.id]; if (!it) return;
   var bw, bh, s, fw, fh, stage = $('#rwStage');
   if (wide()) {
     var PW = 424, G = 40, M = 32;
-    bw = innerWidth - PW - G - 2 * M; bh = rw.clientHeight - 24 - 24 - 40;
+    bw = innerWidth - PW - G - 2 * M; bh = rw.clientHeight - 24 - 24;
     s = Math.min(bw / it.w, bh / it.h); fw = Math.floor(it.w * s); fh = Math.floor(it.h * s);
     /* длинному скриншоту окно пошире, чтобы было где увеличить */
     var vw = Math.min(bw, 520); RW.tall = fw < vw * .45;
@@ -821,9 +784,9 @@ RW.layout = function(){
     var x = Math.max(M, Math.round((innerWidth - (vw + G + PW)) / 2));
     stage.style.left = x + 'px'; stage.style.width = vw + 'px';
     rwFit.style.width = vw + 'px'; rwFit.style.height = bh + 'px';
-    rwSheet.style.left = rwText.style.left = (x + vw + G) + 'px';
+    rwSheet.style.left = (x + vw + G) + 'px';
   } else {
-    stage.style.left = stage.style.width = rwFit.style.width = rwFit.style.height = rwSheet.style.left = rwText.style.left = '';
+    stage.style.left = stage.style.width = rwFit.style.width = rwFit.style.height = rwSheet.style.left = '';
     bw = rwFit.clientWidth; bh = rwFit.clientHeight; s = Math.min(bw / it.w, bh / it.h); fw = Math.floor(it.w * s); fh = Math.floor(it.h * s);
     RW.tall = fw < bw * .45;
   }
@@ -842,10 +805,10 @@ RW.render = function(){
   var p = RW.p, q = RW.q, f = RW.from || {dx:0, dy:0, s:1, rot:0}, ip = 1 - p, cp = clamp(p, 0, 1), W = innerWidth;
   rwFrame.style.transform = 'translate3d(' + (f.dx * ip - q * W * 1.15) + 'px,' + (f.dy * ip + q * 30) + 'px,0) rotate(' + (f.rot * ip - q * 12) + 'deg) scale(' + (1 + (f.s - 1) * ip) + ')';
   var o = cp * (1 - clamp(q * 1.5, 0, 1));
-  rwBg.style.opacity = o; rwHead.style.opacity = o;
+  rwBg.style.opacity = o;
   var hide = clamp(1 - cp + q, 0, 1);
   if (wide()) { rwSheet.style.transform = 'translate3d(' + (hide * 56) + 'px,0,0)'; rwSheet.style.opacity = 1 - hide; }
-  else { rwSheet.style.transform = 'translate3d(0,' + (hide * 104) + '%,0)'; rwSheet.style.opacity = ''; }
+  else { rwSheet.style.transform = 'translate3d(0,' + (hide * 24) + 'px,0)'; rwSheet.style.opacity = 1 - hide; }
   var c = S.top && S.top.dataset.card === RW.id ? S.top : null;
   if (c) c.style.opacity = clamp(1 - cp * 2.5, 0, 1);
 };
@@ -858,12 +821,12 @@ RW.open = function(id, vx, src){
   var it = byId[id]; if (!it || RW.on) return;
   if (S.sx) { S.sx.stop(); S.sx = null; }
   RW.on = true; RW.busy = false; RW.id = id; RW.snap = st.dec[id] ? JSON.stringify(st.dec[id]) : null;
-  RW.d = D(id); RW.t = -1; RW.typing = false; RW.q = 0; RW.src = src || null;
+  RW.d = D(id); RW.t = -1; RW.q = 0; RW.src = src || null;
   hideToast(); closeMenu();
   document.documentElement.classList.add('lock');
   BG.forEach(function(e){ e.inert = true; });
-  rw.hidden = false; rw.classList.remove('typing'); rwText.hidden = true;
-  $('#rwCode').textContent = it.code; $('#rwCode2').textContent = it.code; $('#rwTitle').textContent = it.title;
+  rw.hidden = false;
+  $('#rwCode2').textContent = it.code; $('#rwTitle').textContent = it.title;
   rwImg.src = it.src; rwImg.alt = 'Макет «' + it.title + '». Нажмите, чтобы поставить точку';
   RW.frac = shotFrac(id);
   RW.layout(); RZ.reset(); RW.paint();
@@ -871,14 +834,16 @@ RW.open = function(id, vx, src){
   RW.from = RW.fromRect(RW.tall ? null : src);
   if (src) src.style.visibility = 'hidden';
   RW.p = 0; RW.render();
+  /* поле сразу в фокусе: на телефоне открывается клавиатура с её микрофоном. Фокус только здесь, в обработчике нажатия, иначе iOS не покажет клавиатуру */
+  RW.focus();
   RW.anim(1, vx, function(){ if (S.top && S.top.dataset.card === id && !S.sx) { S.x = 0; S.render(); } });
   if (S.top && S.top.dataset.card === id) setTimeout(function(){ if (RW.on && !S.sx) { S.x = 0; S.render(); } }, 160);
-  if (wide()) setTimeout(function(){ var b = tgList.querySelector('[aria-pressed="true"]'); if (b && RW.on) b.focus({preventScroll:true}); }, 80);
 };
 RW.close = function(){
   if (RW.sp) { RW.sp.stop(); RW.sp = null; }
-  RW.on = false; RW.busy = false; RW.typing = false;
-  rw.hidden = true; rw.classList.remove('typing'); rwText.hidden = true;
+  MIC.stop(); if (document.activeElement === rwTa) rwTa.blur();
+  RW.on = false; RW.busy = false;
+  rw.hidden = true;
   rwFrame.style.transform = ''; rwSheet.style.transform = ''; rwSheet.style.opacity = '';
   document.documentElement.classList.remove('lock');
   BG.forEach(function(e){ e.inert = false; });
@@ -887,7 +852,7 @@ RW.close = function(){
 };
 RW.cancel = function(){
   if (!RW.on || RW.busy) return;
-  if (RW.typing) RW.closeText(true);
+  MIC.stop();
   var id = RW.id;
   if (RW.snap) st.dec[id] = JSON.parse(RW.snap); else delete st.dec[id];
   persist(id, true); RW.busy = true;
@@ -900,7 +865,7 @@ RW.cancel = function(){
 RW.send = function(){
   if (!RW.on || RW.busy) return;
   var id = RW.id, snap = RW.snap;
-  if (RW.typing) { RW.typing = false; rwTa.blur(); rw.classList.remove('typing'); rwText.hidden = true; }
+  MIC.stop(); rwTa.blur();
   RW.d.s = 'fix'; RW.commit(); persist(id, true); RW.busy = true;
   if (RW.src) { RW.src.style.visibility = ''; RW.src = null; }
   if (!RW.tall) RZ.reset();
@@ -915,26 +880,23 @@ RW.paint = function(pop){
   var d = RW.d, t = RW.t;
   tgList.innerHTML = '<button type="button" class="tg" data-tg="-1" aria-pressed="' + (t < 0) + '">Весь экран</button>' +
     d.pins.map(function(p, k){ return '<button type="button" class="tg tg-n" data-tg="' + k + '" aria-pressed="' + (t === k) + '" aria-label="Точка ' + (k + 1) + '">' + (k + 1) + '</button>'; }).join('');
-  /* весь экран: сначала темы экрана, ниже те же фразы; точка: фразы */
-  $('#g1L').textContent = t < 0 ? 'Что не так на экране' : 'Что не так в точке ' + (t + 1);
-  $('#g1').innerHTML = t < 0 ? chipsHTML(TAGS, d.tags, 'tag') : chipsHTML(PH, d.pins[t].ph, 'ph');
-  $('#g1L').hidden = !(t < 0 ? TAGS : PH).length;
-  $('#g2W').hidden = t >= 0 || !PH.length;
-  $('#g2').innerHTML = t < 0 ? chipsHTML(PH, d.ph, 'ph') : '';
-  var txt = clean(t < 0 ? d.c : d.pins[t].t);
-  $('#txBtnL').textContent = txt ? txt : 'Добавить текст';
-  $('#txBtn').setAttribute('aria-label', (txt ? 'Изменить текст: ' + txt : 'Добавить текст') + (t < 0 ? ' ко всему экрану' : ' к точке ' + (t + 1)));
+  $('#rwHint').hidden = d.pins.length > 0;
+  /* весь экран: фразы, потом темы ревью, если они заданы в spec; точка: фразы */
+  phList.innerHTML = t < 0 ? chipsHTML(PH, d.ph, 'ph') + chipsHTML(TAGS, d.tags, 'tag') : chipsHTML(PH, d.pins[t].ph, 'ph');
+  phList.hidden = !phList.firstChild;
+  var v = t < 0 ? d.c : d.pins[t].t; if (rwTa.value !== v) rwTa.value = v;
+  rwTa.placeholder = t < 0 ? 'Что поправить на экране' : 'Что поправить в точке ' + (t + 1);
+  rwTa.setAttribute('aria-label', t < 0 ? 'Заметка ко всему экрану' : 'Заметка к точке ' + (t + 1));
   var del = $('#pinDel'); del.hidden = t < 0; if (t >= 0) { del.setAttribute('aria-label', 'Удалить точку ' + (t + 1)); del.title = 'Удалить точку ' + (t + 1); }
   rwPins.innerHTML = pinsHTML(d, t, pop);
   var a = tgList.querySelector('[aria-pressed="true"]');
   if (a) { var l = a.offsetLeft - tgList.offsetLeft, r = l + a.offsetWidth; if (l < tgList.scrollLeft) tgList.scrollLeft = l - 8; else if (r > tgList.scrollLeft + tgList.clientWidth) tgList.scrollLeft = r - tgList.clientWidth + 8; }
-  shBody.scrollTop = 0; RW.more();
 };
 function chipsHTML(list, sel, kind){ return list.map(function(x){ return '<button type="button" class="chip" data-' + kind + '="' + esc(x) + '" aria-pressed="' + (sel.indexOf(x) >= 0) + '">' + esc(x) + '</button>'; }).join(''); }
-RW.more = function(){ shBody.parentNode.classList.toggle('more', shBody.scrollHeight - shBody.scrollTop > shBody.clientHeight + 4); };
-RW.select = function(k){ RW.t = k; RW.paint(); };
+RW.focus = function(){ rwTa.focus({preventScroll:true}); var n = rwTa.value.length; try { rwTa.setSelectionRange(n, n); } catch (e) {} };
+RW.select = function(k){ MIC.stop(); RW.t = k; RW.paint(); RW.focus(); };
 RW.addPin = function(e){
-  if (!RW.on || RW.typing || RW.busy) return;
+  if (!RW.on || RW.busy) return;
   var r = rwZoom.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
   if (x < -.02 || x > 1.02 || y < -.02 || y > 1.02) return;
   var hit = -1, best = 24;
@@ -942,44 +904,69 @@ RW.addPin = function(e){
   if (hit >= 0) { RW.select(hit); return; }
   if (RW.d.pins.length >= MAXP) { toastMsg('Не больше ' + MAXP + ' точек на экран'); return; }
   RW.d.pins.push({x:+clamp(x, 0, 1).toFixed(4), y:+clamp(y, 0, 1).toFixed(4), t:'', ph:[]});
-  RW.t = RW.d.pins.length - 1; RW.commit(); RW.paint(RW.t);
+  MIC.stop(); RW.t = RW.d.pins.length - 1; RW.commit(); RW.paint(RW.t); RW.focus();
 };
 RW.delPin = function(){
   var t = RW.t; if (t < 0) return;
-  RW.d.pins.splice(t, 1); RW.t = RW.d.pins.length ? Math.max(0, t - 1) : -1; RW.commit(); RW.paint();
+  MIC.stop(); RW.d.pins.splice(t, 1); RW.t = RW.d.pins.length ? Math.max(0, t - 1) : -1; RW.commit(); RW.paint();
 };
 RW.toggle = function(list, v, b){ var k = list.indexOf(v); if (k >= 0) list.splice(k, 1); else list.push(v); b.setAttribute('aria-pressed', String(k < 0)); RW.commit(); };
-RW.crop = function(){
-  var it = byId[RW.id], box = $('#crop'), inner = $('#cropIn'), bw = box.clientWidth, bh = box.clientHeight, t = RW.t, d = RW.d, s, w, h, l, tp;
-  if (t < 0 || !d.pins[t]) { s = Math.min(bw / it.w, bh / it.h); w = it.w * s; h = it.h * s; l = (bw - w) / 2; tp = (bh - h) / 2; }
-  else { var p = d.pins[t], reg = Math.min(it.w, Math.max(it.w * .6, 200)); s = Math.max(bw / reg, bh / it.h); w = it.w * s; h = it.h * s; l = clamp(bw / 2 - p.x * w, bw - w, 0); tp = clamp(bh / 2 - p.y * h, bh - h, 0); }
-  inner.style.width = w + 'px'; inner.style.height = h + 'px'; inner.style.transform = 'translate(' + l + 'px,' + tp + 'px)';
-  $('#cropImg').src = it.src; $('#cropPins').innerHTML = t < 0 ? pinsHTML(d, -1) : pinsHTML(d, t);
-};
-RW.openText = function(){
-  if (!RW.on || RW.typing || RW.busy) return;
-  var t = RW.t, d = RW.d, ph = t < 0 ? d.tags.concat(d.ph) : d.pins[t].ph;
-  RW.typing = true; rw.classList.add('typing'); rwText.hidden = false;
-  $('#txSum').innerHTML = (t < 0 ? '<span class="code">' + byId[RW.id].code + '</span><span>Весь экран' : '<span class="pin on">' + (t + 1) + '</span><span>Точка ' + (t + 1)) + ': ' + esc(ph.length ? ph.join(', ') : 'фразы не выбраны') + '</span>';
-  $('#txL').innerHTML = (t < 0 ? 'Комментарий к экрану' : 'Текст к точке ' + (t + 1)) + '<small>необязательно</small>';
-  rwTa.value = t < 0 ? d.c : d.pins[t].t;
-  RW.crop();
-  rwTa.focus({preventScroll:true});
-  var n = rwTa.value.length; try { rwTa.setSelectionRange(n, n); } catch (e) {}
-};
-RW.closeText = function(quiet){
-  if (!RW.typing) return;
-  RW.typing = false; rwTa.blur(); rw.classList.remove('typing'); rwText.hidden = true;
-  RW.layout(); RW.render();
-  if (!quiet) { RW.paint(); if (wide()) $('#txBtn').focus({preventScroll:true}); }
-};
-rwTa.addEventListener('input', function(){ if (!RW.on) return; if (RW.t < 0) RW.d.c = rwTa.value; else if (RW.d.pins[RW.t]) RW.d.pins[RW.t].t = rwTa.value; RW.commit(); });
+RW.input = function(){ if (!RW.on) return; if (RW.t < 0) RW.d.c = rwTa.value; else if (RW.d.pins[RW.t]) RW.d.pins[RW.t].t = rwTa.value; RW.commit(); };
+rwTa.addEventListener('input', RW.input);
+/* начали печатать во время диктовки: диктовка останавливается, её поздний текст не перепишет набранное */
+rwTa.addEventListener('keydown', function(e){ if (MIC.r && e.key && e.key.length === 1) MIC.stop(); });
 rwFrame.addEventListener('click', function(e){ RW.addPin(e); });
 var COARSE = window.matchMedia && matchMedia('(pointer: coarse)').matches;
-$('#rwHint').textContent = COARSE ? 'Нажатие ставит точку, щипок увеличивает' : 'Нажатие ставит точку, колесо мыши увеличивает';
+$('#rwHint').textContent = COARSE ? 'Нажатие на макет ставит точку, щипок увеличивает' : 'Клик по макету ставит точку, колесо мыши увеличивает';
 var RZ = Zoom({box:rwFit, frame:rwFrame, layer:rwZoom,
-  active:function(){ return RW.on && !RW.busy && !RW.typing; },
-  onChange:function(z){ var on = z.s > 1.001; $('#rwUnzoom').hidden = !on; $('#rwHint').hidden = on; }});
+  active:function(){ return RW.on && !RW.busy; },
+  onChange:function(z){ $('#rwUnzoom').hidden = z.s <= 1.001; }});
+
+/* ---------- диктовка ---------- */
+/* Распознаёт браузер: Chrome, Edge, Safari. Где микрофон не дают (браузер, настройки, рамка приложения),
+   кнопка прячется и остаётся микрофон клавиатуры: поле уже в фокусе, клавиатура открыта. */
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var MIC = {r:null, late:null, base:'', t:-1, off:!SR};
+try { if (localStorage.getItem('drm-mic') === 'off') MIC.off = true; } catch (e) {}
+MIC.show = function(){ micBtn.hidden = MIC.off; $('#taW').classList.toggle('has-mic', !MIC.off); };
+MIC.set = function(on){ var l = on ? 'Остановить диктовку' : 'Диктовать'; micBtn.setAttribute('aria-pressed', String(on)); micBtn.setAttribute('aria-label', l); micBtn.title = l; };
+/* в части браузеров каждый следующий кусок повторяет предыдущие: склеиваем без повторов */
+MIC.join = function(res){
+  var s = '';
+  for (var i = 0; i < res.length; i++) {
+    var t = String(res[i][0] && res[i][0].transcript || '').trim(); if (!t) continue;
+    if (s && t.toLowerCase().indexOf(s.toLowerCase()) === 0) s = t; else s = s ? s + ' ' + t : t;
+  }
+  return s;
+};
+MIC.start = function(){
+  if (MIC.r || MIC.off || !RW.on) return;
+  var r; try { r = new SR(); } catch (e) { MIC.fail(); return; }
+  r.lang = 'ru-RU'; r.continuous = true; r.interimResults = true;
+  MIC.t = RW.t; MIC.base = rwTa.value.replace(/\s+$/, '');
+  r.onresult = function(e){
+    if ((MIC.r !== r && MIC.late !== r) || !RW.on || RW.t !== MIC.t) return;
+    var s = MIC.join(e.results); if (!s) return;
+    if (!MIC.base || /[.!?]$/.test(MIC.base)) s = s.charAt(0).toUpperCase() + s.slice(1);
+    rwTa.value = MIC.base ? MIC.base + ' ' + s : s; RW.input();
+    rwTa.scrollTop = rwTa.scrollHeight;
+  };
+  r.onerror = function(e){ if (e.error === 'not-allowed' || e.error === 'service-not-allowed' || e.error === 'audio-capture') MIC.fail(true); };
+  r.onend = function(){ if (MIC.r === r) { MIC.r = null; MIC.set(false); } };
+  MIC.r = r; MIC.late = null; MIC.set(true);
+  /* на телефоне клавиатура при диктовке не нужна: видно макет, поле и фразы */
+  if (COARSE && document.activeElement === rwTa) rwTa.blur();
+  try { r.start(); } catch (e) { MIC.r = null; MIC.set(false); MIC.fail(); }
+};
+/* keep: остановили кнопкой, последний распознанный кусок ещё допишется */
+MIC.stop = function(keep){ var r = MIC.r; MIC.late = keep ? r : null; if (!r) return; MIC.r = null; MIC.set(false); try { r.stop(); } catch (e) {} };
+MIC.toggle = function(){ if (MIC.r) MIC.stop(true); else MIC.start(); };
+MIC.fail = function(remember){
+  MIC.stop(); MIC.off = true; MIC.show();
+  if (remember) { try { localStorage.setItem('drm-mic', 'off'); } catch (e) {} }
+  toastMsg('Микрофон недоступен, диктуйте с клавиатуры');
+};
+MIC.show();
 
 /* ---------- просмотр скриншота на весь экран ---------- */
 var vw = $('#vw'), vwBg = $('#vwBg'), vwFit = $('#vwFit'), vwFrame = $('#vwFrame'), vwTop = $('#vwTop'), vwBar = $('#vwBar');
@@ -1036,19 +1023,18 @@ V.close = function(){
   BG.forEach(function(e){ e.inert = false; });
   if (V.ret && V.ret.focus && document.contains(V.ret)) V.ret.focus({preventScroll:true});
 };
-shBody.addEventListener('scroll', RW.more, {passive:true});
 
 /* ---------- видимая область (дополнительно, раскладка от этого не зависит) ---------- */
 function onVV(){
   var v = window.visualViewport, r = document.documentElement.style; if (!v) return;
   if (v.height < window.innerHeight - 1 || v.offsetTop > .5) { r.setProperty('--vvh', v.height + 'px'); r.setProperty('--vvt', v.offsetTop + 'px'); }
   else { r.removeProperty('--vvh'); r.removeProperty('--vvt'); }
-  if (RW.on) { RW.layout(); RW.render(); RW.more(); }
+  if (RW.on) { RW.layout(); RW.render(); }
 }
 if (window.visualViewport) { visualViewport.addEventListener('resize', onVV); visualViewport.addEventListener('scroll', onVV); }
 var rT = 0;
 window.addEventListener('resize', function(){
-  onVV(); if (RW.on) { RW.layout(); RW.render(); RW.more(); if (RW.typing) RW.crop(); }
+  onVV(); if (RW.on) { RW.layout(); RW.render(); }
   if (V.on) V.layout();
   clearTimeout(rT); rT = setTimeout(function(){ if (!RW.on && !S.flying && !S.drag && S.top) S.build(st.cur); }, 150);
 });
@@ -1080,9 +1066,8 @@ document.addEventListener('click', function(e){
   if ((b = t.closest('[data-tg]'))) { RW.select(+b.dataset.tg); return; }
   if ((b = t.closest('[data-ph]'))) { RW.toggle(RW.t < 0 ? RW.d.ph : RW.d.pins[RW.t].ph, b.dataset.ph, b); return; }
   if ((b = t.closest('[data-tag]'))) { RW.toggle(RW.d.tags, b.dataset.tag, b); return; }
-  if ((b = t.closest('#txBtn'))) { RW.openText(); return; }
   if ((b = t.closest('#pinDel'))) { RW.delPin(); return; }
-  if ((b = t.closest('[data-tx]'))) { RW.closeText(); return; }
+  if ((b = t.closest('#micBtn'))) { MIC.toggle(); return; }
   if ((b = t.closest('[data-rw]'))) { if (b.dataset.rw === 'send') RW.send(); else RW.cancel(); return; }
 });
 document.addEventListener('keydown', function(e){
@@ -1096,8 +1081,9 @@ document.addEventListener('keydown', function(e){
     return;
   }
   if (RW.on) {
-    if (e.key === 'Escape') { e.preventDefault(); if (RW.typing) RW.closeText(); else RW.cancel(); return; }
-    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); RW.send(); return; }
+    if (e.key === 'Escape') { e.preventDefault(); RW.cancel(); return; }
+    /* Enter в поле отправляет (на телефоне это клавиша «Отправить»), Shift + Enter переносит строку */
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing && e.keyCode !== 229 && (e.target === rwTa || e.ctrlKey || e.metaKey)) { e.preventDefault(); RW.send(); return; }
     return;
   }
   var tg = e.target;
