@@ -134,11 +134,19 @@ button{font:inherit;color:inherit}
 .card.dragging{cursor:grabbing}
 .card.under{transform-origin:50% 100%;pointer-events:none;box-shadow:0 1px 2px rgba(31,27,58,.05)}
 .card.under>.card-shot,.card.under>.card-info{opacity:calc(.5 + .5 * var(--d, 0))}
-.card-shot{flex:1;min-height:0;margin:10px 10px 0;border-radius:var(--r-in);background:var(--shot-bg);display:flex;align-items:center;justify-content:center;position:relative}
+.card-shot{flex:1;min-height:0;margin:10px 10px 0;border-radius:var(--r-in);background:var(--shot-bg);display:flex;align-items:center;justify-content:center;position:relative;cursor:zoom-in}
+/* длинный скриншот: по ширине карточки, листается внутри */
+.card-shot.tall{display:block;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.card-shot.tall .frame{margin:12px auto 40px}
+.card-shot.tall::after{content:'';position:sticky;display:block;bottom:0;height:40px;margin-top:-40px;background:linear-gradient(to bottom, transparent, var(--shot-bg));pointer-events:none}
+.zoom-btn{appearance:none;border:0;position:absolute;top:20px;right:20px;z-index:2;width:44px;height:44px;border-radius:var(--r-pill);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;color:var(--ink);background:var(--popup);box-shadow:0 0 0 1px var(--border), var(--sh-pop);transition:transform .14s var(--ease)}
+.zoom-btn:active{transform:scale(.94)}
+.zoom-btn .ic{font-size:22px}
 .frame{position:relative;flex:none}
 .frame>img{display:block;width:100%;height:100%;border-radius:var(--r-img);box-shadow:0 1px 3px rgba(31,27,58,.12);pointer-events:none;-webkit-user-drag:none}
 .pins{position:absolute;inset:0;pointer-events:none}
-.card-info{flex:none;padding:14px 20px 20px}
+.card-info{flex:none;position:relative;padding:14px 20px 20px}
 .card-meta{display:flex;align-items:center;gap:8px;min-height:28px}
 .code{display:inline-flex;align-items:center;height:28px;padding:0 11px;border-radius:var(--r-pill);background:var(--soft);color:var(--on-soft);font:700 14px/1 var(--font);flex:none}
 .badge{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:var(--r-pill);font:700 13px/1 var(--font);white-space:nowrap}
@@ -146,16 +154,30 @@ button{font:inherit;color:inherit}
 .pos{margin-left:auto;font:600 14px/1 var(--font);color:var(--muted);white-space:nowrap}
 .card-t{margin:10px 0 0;font:700 19px/1.3 var(--font);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card-note{margin:6px 0 0;font:400 15px/1.45 var(--font);color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* описание не влезло: «Ещё» поверх конца последней строки, раскрытое описание закрывает низ скриншота и листается */
+.note-more{display:none;appearance:none;border:0;cursor:pointer;position:absolute;right:20px;bottom:20px;height:22px;padding:0 0 0 36px;
+  background:linear-gradient(to right, transparent, var(--surface) 30px);color:var(--on-soft);font:700 15px/22px var(--font)}
+.card.has-more .note-more{display:block}
+.card.has-more .card-note,.card.has-more .card-t{cursor:pointer}
+.card.info-open .card-info{position:absolute;left:0;right:0;bottom:0;z-index:2;max-height:calc(100% - 72px);overflow-y:auto;overscroll-behavior:contain;
+  background:var(--surface);border-top:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--sh-sheet)}
+.card.info-open .card-t{white-space:normal}
+.card.info-open .card-note{display:block;overflow:visible;-webkit-line-clamp:unset}
+.card.info-open .note-more{position:static;height:44px;margin-top:6px;padding:0;background:none}
 .stamp{position:absolute;top:22px;z-index:3;padding:9px 18px;border-radius:var(--r-pill);border:2.5px solid;font:700 20px/1 var(--font);opacity:0;pointer-events:none;white-space:nowrap}
 .st-ok{left:22px;color:var(--ok);border-color:var(--ok);background:var(--ok-bg);transform:rotate(-8deg)}
 .st-fix{right:22px;color:var(--warn);border-color:var(--warn);background:var(--warn-bg);transform:rotate(8deg)}
 
 /* точки на макете */
 .pin{position:absolute;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:var(--r-pill);background:var(--pin);color:var(--pin-ink);
-  font:700 14px/28px var(--font);text-align:center;box-shadow:0 0 0 2px var(--pin-edge), var(--sh-pin);transition:transform .2s var(--ease)}
-.pin.on{transform:scale(1.14);box-shadow:0 0 0 2px var(--pin-edge), 0 0 0 5px var(--accent), var(--sh-pin);z-index:2}
+  font:700 14px/28px var(--font);text-align:center;box-shadow:0 0 0 2px var(--pin-edge), var(--sh-pin);transform:scale(var(--pz, 1));transition:transform .2s var(--ease)}
+.pin.on{transform:scale(calc(var(--pz, 1) * 1.14));box-shadow:0 0 0 2px var(--pin-edge), 0 0 0 5px var(--accent), var(--sh-pin);z-index:2}
 .pin.pop{animation:pop .42s var(--ease)}
-@keyframes pop{0%{transform:scale(.2);opacity:0}55%{transform:scale(1.3);opacity:1}100%{transform:scale(1.14)}}
+@keyframes pop{0%{transform:scale(calc(var(--pz, 1) * .2));opacity:0}55%{transform:scale(calc(var(--pz, 1) * 1.3));opacity:1}100%{transform:scale(calc(var(--pz, 1) * 1.14))}}
+
+/* слой увеличения: внутри рамки, сдвиг и кратность задаёт Zoom */
+.zl{position:absolute;left:0;top:0;width:100%;height:100%;transform-origin:0 0}
+.zl>img{display:block;width:100%;height:100%;border-radius:var(--r-img);box-shadow:var(--sh-card);pointer-events:none;-webkit-user-drag:none;user-select:none}
 
 /* ---------- нижняя панель ---------- */
 .dock{flex:none;display:grid;gap:8px;padding:0 var(--gr) calc(12px + var(--sab)) var(--gl)}
@@ -209,11 +231,13 @@ body.is-done .dock{display:none}
 .rw[hidden]{display:none}
 .rw-bg{position:absolute;inset:0;background:var(--bg);opacity:0}
 .rw-stage{position:absolute;left:0;right:0;top:0;height:54%;padding:calc(var(--sat) + 12px) var(--gr) 0 var(--gl);display:flex;flex-direction:column;transition:opacity .2s var(--ease)}
-.rw-fit{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
-.rw-frame{position:relative;flex:none;cursor:crosshair;transform-origin:50% 50%;will-change:transform;touch-action:manipulation}
-.rw-frame>img{display:block;width:100%;height:100%;border-radius:var(--r-img);box-shadow:var(--sh-card);pointer-events:none;-webkit-user-drag:none;user-select:none}
+.rw-fit{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;touch-action:none}
+.rw-fit.zoomed{overflow:hidden;border-radius:var(--r-in)}
+.rw-frame{position:relative;flex:none;cursor:crosshair;transform-origin:50% 50%;will-change:transform}
 .rw-head{flex:none;height:40px;margin:0;display:flex;align-items:center;justify-content:center;gap:10px;font:600 14px/1.25 var(--font);color:var(--muted);text-align:center}
 .rw-head .code{height:26px;font-size:13px}
+.rw-head [hidden]{display:none}
+.btn-sm{height:32px;padding:0 14px;font-size:14px}
 .rw-sheet{position:absolute;left:0;right:0;bottom:0;top:54%;display:flex;flex-direction:column;will-change:transform}
 .sh-in{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;background:var(--surface);border-top:1px solid var(--border);border-radius:var(--r-card) var(--r-card) 0 0;box-shadow:var(--sh-sheet);
   padding:12px var(--gr) calc(12px + var(--sab)) var(--gl);transition:transform .24s var(--ease), opacity .2s var(--ease)}
@@ -264,6 +288,24 @@ body.is-done .dock{display:none}
 .tx-f{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
 .tx-f .btn{min-width:132px}
 
+/* ---------- просмотр скриншота на весь экран ---------- */
+.vw{position:fixed;z-index:60;inset:0;height:100vh;height:100dvh;overflow:hidden;overscroll-behavior:none}
+.vw[hidden]{display:none}
+.vw:not([hidden]){animation:vwIn .2s var(--ease)}
+@keyframes vwIn{from{opacity:0}to{opacity:1}}
+.vw-bg{position:absolute;inset:0;background:var(--bg)}
+.vw-fit{position:absolute;inset:0;touch-action:none;cursor:grab}
+.vw-frame{position:absolute}
+.vw-top{position:absolute;left:0;right:0;top:0;display:flex;align-items:center;gap:10px;min-height:56px;padding:calc(var(--sat) + 4px) var(--gr) 4px var(--gl);
+  background:var(--bg);background:color-mix(in srgb, var(--bg) 84%, transparent);-webkit-backdrop-filter:blur(14px) saturate(1.4);backdrop-filter:blur(14px) saturate(1.4)}
+.vw-t{flex:1;min-width:0;margin:0;font:700 17px/1.25 var(--font);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vw-top .btn-icon{margin-right:-8px}
+.vw-bar{position:absolute;left:50%;bottom:calc(16px + var(--sab));transform:translateX(-50%);display:flex;align-items:center;gap:2px;padding:4px;
+  border-radius:var(--r-pill);background:var(--popup);border:1px solid var(--border);box-shadow:var(--sh-pop)}
+.vw-bar .btn{height:44px;padding:0 16px;font-size:15px}
+.vw-bar .btn-icon{width:44px;padding:0}
+.vw-bar .btn-icon .ic{font-size:20px}
+
 /* набор текста: шторка с чипсами уходит */
 .rw.typing .rw-sheet{visibility:hidden;transition:visibility 0s .24s}
 .rw.typing .sh-in{opacity:0;transform:translateY(32px)}
@@ -290,6 +332,7 @@ body.is-done .dock{display:none}
   /* группа «скриншот + панель» по центру, координаты задаёт RW.layout */
   .rw-stage{right:auto;height:auto;padding:24px 0 0}
   .rw-fit{flex:none}
+  .vw-bar{bottom:calc(24px + var(--sab))}
   .rw-sheet{right:auto;top:24px;bottom:auto;width:424px;max-height:calc(100% - 48px)}
   .sh-in{flex:0 1 auto;border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--sh-pop);padding:24px}
   .sh-h{display:flex;align-items:center;gap:10px;margin-bottom:18px}
@@ -326,6 +369,10 @@ body.is-done .dock{display:none}
   <symbol id="i-right" viewBox="0 0 256 256"><path d="M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z"/></symbol>
   <symbol id="i-pencil" viewBox="0 0 256 256"><path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"/></symbol>
   <symbol id="i-trash" viewBox="0 0 256 256"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"/></symbol>
+  <symbol id="i-zoom" viewBox="0 0 256 256"><path d="M152,112a8,8,0,0,1-8,8H120v24a8,8,0,0,1-16,0V120H80a8,8,0,0,1,0-16h24V80a8,8,0,0,1,16,0v24h24A8,8,0,0,1,152,112Zm77.66,117.66a8,8,0,0,1-11.32,0l-50.06-50.07a88.11,88.11,0,1,1,11.31-11.31l50.07,50.06A8,8,0,0,1,229.66,229.66ZM112,184a72,72,0,1,0-72-72A72.08,72.08,0,0,0,112,184Z"/></symbol>
+  <symbol id="i-x" viewBox="0 0 256 256"><path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"/></symbol>
+  <symbol id="i-minus" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></symbol>
 </svg>
 <header class="hd" id="hd">
   <h1 class="hd-t">__HEADING__</h1>
@@ -358,13 +405,24 @@ body.is-done .dock{display:none}
 </div>
 <div class="toast" id="toast" role="status" aria-live="polite"><span class="toast-t" id="toastT"></span><button type="button" class="btn" id="toastU" hidden>Отменить</button></div>
 
+<div class="vw" id="vw" hidden role="dialog" aria-modal="true" aria-labelledby="vwTitle">
+  <div class="vw-bg" id="vwBg"></div>
+  <div class="vw-fit" id="vwFit"><div class="vw-frame" id="vwFrame"><div class="zl" id="vwZoom"><img id="vwImg" alt="" draggable="false"><span class="pins" id="vwPins"></span></div></div></div>
+  <div class="vw-top" id="vwTop"><span class="code" id="vwCode">Э1</span><h2 class="vw-t" id="vwTitle">Экран</h2><button type="button" class="btn btn-ghost btn-icon" data-vw="close" id="vwClose" aria-label="Закрыть"><svg class="ic" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+  <div class="vw-bar" id="vwBar">
+    <button type="button" class="btn btn-ghost btn-icon" data-vw="out" id="vwOut" aria-label="Уменьшить"><svg class="ic" aria-hidden="true"><use href="#i-minus"/></svg></button>
+    <button type="button" class="btn btn-ghost" data-vw="fit" id="vwFitB">Вписать</button>
+    <button type="button" class="btn btn-ghost btn-icon" data-vw="in" id="vwIn" aria-label="Увеличить"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg></button>
+  </div>
+</div>
+
 <div class="rw" id="rw" hidden role="dialog" aria-modal="true" aria-labelledby="rwTitle">
   <div class="rw-bg" id="rwBg"></div>
   <div class="rw-stage" id="rwStage">
     <div class="rw-fit" id="rwFit">
-      <div class="rw-frame" id="rwFrame"><img id="rwImg" alt="" draggable="false"><span class="pins" id="rwPins"></span></div>
+      <div class="rw-frame" id="rwFrame"><div class="zl" id="rwZoom"><img id="rwImg" alt="" draggable="false"><span class="pins" id="rwPins"></span></div></div>
     </div>
-    <p class="rw-head" id="rwHead"><span class="code" id="rwCode">Э1</span><span>Нажатие на макет ставит точку</span></p>
+    <p class="rw-head" id="rwHead"><span class="code" id="rwCode">Э1</span><span id="rwHint">Нажатие на макет ставит точку</span><button type="button" class="btn btn-line btn-sm" id="rwUnzoom" hidden>Вписать</button></p>
   </div>
   <section class="rw-sheet" id="rwSheet" aria-label="Что доработать">
     <div class="sh-in">
@@ -428,6 +486,107 @@ function spring(o){
 function project(v, d){ d = d || 0.995; return (v / 1000) * d / (1 - d); }
 function hist(d, e){ d.hist.push([e.clientX, e.clientY, e.timeStamp]); while (d.hist.length > 2 && e.timeStamp - d.hist[0][2] > 100) d.hist.shift(); }
 function vel(d){ var h = d.hist, a = h[0], b = h[h.length - 1], dt = Math.max(8, b[2] - a[2]); return {vx:(b[0] - a[0]) / dt * 1000, vy:(b[1] - a[1]) / dt * 1000}; }
+/* Увеличение скриншота: слой o.layer внутри рамки o.frame, окно o.box. s — кратность от вписанного размера.
+   Щипок двумя пальцами, колесо мыши, перетаскивание увеличенного, двойное нажатие (o.dbl), потянуть вниз (o.onPull). */
+function Zoom(o){
+  var z = {s:1, x:0, y:0, max:4}, P = {}, g = null, sp = null, idle = 0, lastTap = null;
+  function geo(){ var f = o.frame; return {bw:o.box.clientWidth, bh:o.box.clientHeight, ox:f.offsetLeft, oy:f.offsetTop, fw:f.offsetWidth, fh:f.offsetHeight}; }
+  function ins(){ return o.inset ? o.inset() : {t:0, b:0}; }
+  function fix(){
+    var G = geo(), W = G.fw * z.s, H = G.fh * z.s, I = ins();
+    z.x = W <= G.bw ? (G.bw - W) / 2 - G.ox : clamp(z.x, G.bw - G.ox - W, -G.ox);
+    z.y = H <= G.bh - I.t - I.b ? (G.bh - H) / 2 - G.oy : clamp(z.y, G.bh - I.b - G.oy - H, I.t - G.oy);
+  }
+  function apply(){
+    fix();
+    var on = z.s > 1.001;
+    o.layer.style.transform = on || Math.abs(z.x) > .5 || Math.abs(z.y) > .5 ? 'translate(' + z.x + 'px,' + z.y + 'px) scale(' + z.s + ')' : '';
+    o.layer.style.setProperty('--pz', String(1 / z.s));
+    o.box.classList.toggle('zoomed', on);
+    if (o.onChange) o.onChange(z);
+  }
+  /* во время жеста слой отдельный (плавно), после него перерисовка в полном разрешении (чётко) */
+  function busy(){ o.layer.style.willChange = 'transform'; clearTimeout(idle); idle = setTimeout(function(){ o.layer.style.willChange = ''; }, 220); }
+  function stop(){ if (sp) { sp.stop(); sp = null; } }
+  function anchor(cx, cy){ var b = o.box.getBoundingClientRect(), G = geo(); return {bx:cx - b.left, by:cy - b.top, lx:(cx - b.left - G.ox - z.x) / z.s, ly:(cy - b.top - G.oy - z.y) / z.s, G:G}; }
+  function at(ns, a){ z.s = clamp(ns, 1, z.max); z.x = a.bx - a.G.ox - a.lx * z.s; z.y = a.by - a.G.oy - a.ly * z.s; apply(); }
+  function mid(){ var b = o.box.getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; }
+  z.geo = geo; z.refit = apply;
+  z.reset = function(){ stop(); z.s = 1; z.x = z.y = 0; apply(); };
+  z.zoomTo = function(ns, cx, cy){
+    stop(); var a = anchor(cx, cy), to = clamp(ns, 1, z.max);
+    if (RM) { at(to, a); return; }
+    sp = spring({from:z.s, to:to, response:.34, damping:1, eps:.002, onUpdate:function(s){ busy(); at(s, a); }, onDone:function(){ sp = null; }});
+  };
+  z.by = function(f){ var c = mid(); z.zoomTo(z.s * f, c[0], c[1]); };
+  z.out = function(){ var c = mid(); z.zoomTo(1, c[0], c[1]); };
+  /* по ширине окна, с места frac (0 — верх, 1 — низ): для длинных скриншотов */
+  z.fill = function(frac){
+    stop(); var G = geo(), I = ins();
+    z.s = clamp(G.bw * .94 / G.fw, 1, z.max); z.x = 0;
+    z.y = I.t - G.oy - Math.max(0, G.fh * z.s - (G.bh - I.t - I.b)) * clamp(frac || 0, 0, 1); apply();
+  };
+  function begin(){
+    var ids = Object.keys(P);
+    if (ids.length >= 2) {
+      var a = P[ids[0]], b = P[ids[1]];
+      g = {pinch:true, moved:true, d0:Math.max(1, Math.hypot(a.x - b.x, a.y - b.y)), s0:z.s, a:anchor((a.x + b.x) / 2, (a.y + b.y) / 2)};
+    } else if (ids.length === 1) {
+      var q = P[ids[0]];
+      g = {pinch:false, moved:false, sx:q.x, sy:q.y, x0:z.x, y0:z.y, pull:null, h:[]};
+    } else g = null;
+  }
+  o.box.addEventListener('pointerdown', function(e){
+    if (e.button > 0 || !o.active()) return;
+    stop(); P[e.pointerId] = {x:e.clientX, y:e.clientY}; begin();
+  });
+  o.box.addEventListener('pointermove', function(e){
+    if (!P[e.pointerId] || !g) return;
+    P[e.pointerId] = {x:e.clientX, y:e.clientY};
+    if (g.pinch) {
+      var ids = Object.keys(P), a = P[ids[0]], b = P[ids[1]]; if (!b) return;
+      var bx = o.box.getBoundingClientRect(), A = g.a;
+      try { o.box.setPointerCapture(e.pointerId); } catch (er) {}
+      busy(); z.s = clamp(g.s0 * Math.hypot(a.x - b.x, a.y - b.y) / g.d0, 1, z.max);
+      z.x = (a.x + b.x) / 2 - bx.left - A.G.ox - A.lx * z.s; z.y = (a.y + b.y) / 2 - bx.top - A.G.oy - A.ly * z.s; apply();
+      return;
+    }
+    var dx = e.clientX - g.sx, dy = e.clientY - g.sy;
+    if (!g.moved) {
+      if (Math.hypot(dx, dy) < 8) return;
+      g.moved = true; try { o.box.setPointerCapture(e.pointerId); } catch (er) {}
+      if (z.s <= 1.001 && o.onPull && Math.abs(dy) > Math.abs(dx)) g.pull = 0;
+    }
+    if (g.pull !== null) { g.pull = dy; g.h.push([dy, e.timeStamp]); if (g.h.length > 4) g.h.shift(); o.onPull(dy); }
+    else if (z.s > 1.001) { busy(); z.x = g.x0 + dx; z.y = g.y0 + dy; apply(); }
+  });
+  function end(e){
+    if (!P[e.pointerId]) return;
+    delete P[e.pointerId];
+    var was = g;
+    if (Object.keys(P).length) { begin(); if (g) g.moved = true; return; }
+    g = null;
+    if (!was) return;
+    if (was.moved) {
+      swallowClick();
+      if (was.pull !== null) { var h = was.h, v = h.length > 1 ? (h[h.length - 1][0] - h[0][0]) / Math.max(8, h[h.length - 1][1] - h[0][1]) * 1000 : 0; o.onPullEnd(was.pull, v); }
+      return;
+    }
+    if (e.type !== 'pointerup' || !o.dbl) return;
+    var now = e.timeStamp;
+    if (lastTap && now - lastTap.t < 320 && Math.hypot(e.clientX - lastTap.x, e.clientY - lastTap.y) < 30) { lastTap = null; z.zoomTo(z.s > 1.05 ? 1 : o.dbl(), e.clientX, e.clientY); }
+    else lastTap = {t:now, x:e.clientX, y:e.clientY};
+  }
+  o.box.addEventListener('pointerup', end);
+  o.box.addEventListener('pointercancel', end);
+  o.box.addEventListener('wheel', function(e){
+    if (!o.active()) return;
+    e.preventDefault(); stop(); busy();
+    var k = e.ctrlKey ? .01 : e.deltaMode === 1 ? .05 : .0025;
+    at(z.s * Math.exp(-e.deltaY * k), anchor(e.clientX, e.clientY));
+  }, {passive:false});
+  return z;
+}
 function swallowClick(){ var f = function(ev){ ev.stopPropagation(); ev.preventDefault(); }; window.addEventListener('click', f, true); setTimeout(function(){ window.removeEventListener('click', f, true); }, 0); }
 
 /* ---------- данные: подставляет scripts/build.py ---------- */
@@ -488,13 +647,32 @@ function cardEl(it){
   return toEl('<article class="card" data-card="' + it.id + '" style="width:' + z.w + 'px;height:' + z.h + 'px;margin-left:' + (-z.w / 2) + 'px" aria-label="' + esc(it.code + ' ' + it.title) + '">' +
     '<span class="stamp st-ok" aria-hidden="true">Принять</span><span class="stamp st-fix" aria-hidden="true">Доработать</span>' +
     '<div class="card-shot"><div class="frame"><img src="' + it.src + '" width="' + it.w + '" height="' + it.h + '" alt="Макет «' + esc(it.title) + '»" draggable="false"><span class="pins">' + pinsHTML(d, -1) + '</span></div></div>' +
+    '<button type="button" class="zoom-btn" data-zoom aria-label="Открыть скриншот на весь экран"><svg class="ic" aria-hidden="true"><use href="#i-zoom"/></svg></button>' +
     '<div class="card-info"><div class="card-meta"><span class="code">' + it.code + '</span>' + badge(d.s) + '<span class="pos">' + (it.i + 1) + ' из ' + N + '</span></div>' +
-    '<h2 class="card-t">' + esc(it.title) + '</h2>' + (it.note ? '<p class="card-note">' + esc(it.note) + '</p>' : '') + '</div></article>');
+    '<h2 class="card-t" data-more>' + esc(it.title) + '</h2>' + (it.note ? '<p class="card-note" data-more>' + esc(it.note) + '</p>' : '') +
+    '<button type="button" class="note-more" data-more aria-expanded="false">Ещё</button></div></article>');
 }
+/* вписать скриншот в карточку; очень высокий (страница целиком) — по ширине, с прокруткой внутри */
 function fitFrame(card, it){
   var box = card.querySelector('.card-shot'), fr = card.querySelector('.frame');
-  var bw = box.clientWidth - 24, bh = box.clientHeight - 24, s = Math.min(bw / it.w, bh / it.h);
+  var bw = box.clientWidth - 24, bh = box.clientHeight - 24, s = Math.min(bw / it.w, bh / it.h), tall = it.w * s < bw * .45;
+  box.classList.toggle('tall', tall);
+  if (tall) s = (box.clientWidth - 24) / it.w;
   fr.style.width = Math.max(10, Math.floor(it.w * s)) + 'px'; fr.style.height = Math.max(10, Math.floor(it.h * s)) + 'px';
+  var t = card.querySelector('.card-t'), n = card.querySelector('.card-note');
+  card.classList.toggle('has-more', t.scrollWidth > t.clientWidth + 1 || !!(n && n.scrollHeight > n.clientHeight + 1));
+}
+function toggleInfo(card){
+  var open = !card.classList.contains('info-open'), shot = card.querySelector('.card-shot'), b = card.querySelector('.note-more');
+  shot.style.flex = open ? '0 0 ' + shot.offsetHeight + 'px' : '';
+  card.classList.toggle('info-open', open);
+  b.textContent = open ? 'Свернуть' : 'Ещё'; b.setAttribute('aria-expanded', String(open));
+  card.querySelector('.card-info').scrollTop = 0;
+}
+/* доля прокрутки длинного скриншота в карточке: форма и просмотр открываются на том же месте */
+function shotFrac(id){
+  var sh = S.top && S.top.dataset.card === id ? S.top.querySelector('.card-shot') : null;
+  return sh && sh.scrollHeight > sh.clientHeight ? sh.scrollTop / (sh.scrollHeight - sh.clientHeight) : 0;
 }
 S.stop = function(){ ['sx', 'su'].forEach(function(k){ if (S[k]) { S[k].stop(); S[k] = null; } }); S.flying = false; };
 S.build = function(id, enter){
@@ -625,7 +803,7 @@ function closeMenu(){ var m = $('#menu'); if (!m.hidden) { m.hidden = true; $('#
 function toggleMenu(){ var m = $('#menu'); m.hidden = !m.hidden; $('#moreBtn').setAttribute('aria-expanded', String(!m.hidden)); if (!m.hidden) m.querySelector('.mi').focus({preventScroll:true}); }
 
 /* ---------- доработка ---------- */
-var rw = $('#rw'), rwBg = $('#rwBg'), rwFit = $('#rwFit'), rwFrame = $('#rwFrame'), rwImg = $('#rwImg'), rwPins = $('#rwPins'), rwHead = $('#rwHead');
+var rw = $('#rw'), rwBg = $('#rwBg'), rwFit = $('#rwFit'), rwFrame = $('#rwFrame'), rwZoom = $('#rwZoom'), rwImg = $('#rwImg'), rwPins = $('#rwPins'), rwHead = $('#rwHead');
 var rwSheet = $('#rwSheet'), rwText = $('#rwText'), rwTa = $('#rwTa'), shBody = $('#shBody'), tgList = $('#tgList');
 var BG = [$('#hd'), $('#main'), $('#dock')];
 var RW = {on:false, id:null, d:null, snap:null, t:-1, typing:false, p:0, q:0, sp:null, from:null, src:null, busy:false};
@@ -637,14 +815,20 @@ RW.layout = function(){
     var PW = 424, G = 40, M = 32;
     bw = innerWidth - PW - G - 2 * M; bh = rw.clientHeight - 24 - 24 - 40;
     s = Math.min(bw / it.w, bh / it.h); fw = Math.floor(it.w * s); fh = Math.floor(it.h * s);
-    var x = Math.max(M, Math.round((innerWidth - (fw + G + PW)) / 2));
-    stage.style.left = x + 'px'; stage.style.width = fw + 'px';
-    rwSheet.style.left = rwText.style.left = (x + fw + G) + 'px';
+    /* длинному скриншоту окно пошире, чтобы было где увеличить */
+    var vw = Math.min(bw, 520); RW.tall = fw < vw * .45;
+    if (!RW.tall) { vw = fw; bh = fh; }
+    var x = Math.max(M, Math.round((innerWidth - (vw + G + PW)) / 2));
+    stage.style.left = x + 'px'; stage.style.width = vw + 'px';
+    rwFit.style.width = vw + 'px'; rwFit.style.height = bh + 'px';
+    rwSheet.style.left = rwText.style.left = (x + vw + G) + 'px';
   } else {
-    stage.style.left = stage.style.width = rwSheet.style.left = rwText.style.left = '';
+    stage.style.left = stage.style.width = rwFit.style.width = rwFit.style.height = rwSheet.style.left = rwText.style.left = '';
     bw = rwFit.clientWidth; bh = rwFit.clientHeight; s = Math.min(bw / it.w, bh / it.h); fw = Math.floor(it.w * s); fh = Math.floor(it.h * s);
+    RW.tall = fw < bw * .45;
   }
   rwFrame.style.width = Math.max(10, fw) + 'px'; rwFrame.style.height = Math.max(10, fh) + 'px';
+  RZ.max = clamp(2 * it.w / Math.max(10, fw), 3, 10); RZ.refit();
 };
 RW.fromRect = function(src){
   rwFrame.style.transform = 'none';
@@ -681,8 +865,10 @@ RW.open = function(id, vx, src){
   rw.hidden = false; rw.classList.remove('typing'); rwText.hidden = true;
   $('#rwCode').textContent = it.code; $('#rwCode2').textContent = it.code; $('#rwTitle').textContent = it.title;
   rwImg.src = it.src; rwImg.alt = 'Макет «' + it.title + '». Нажмите, чтобы поставить точку';
-  RW.layout(); RW.paint();
-  RW.from = RW.fromRect(src);
+  RW.frac = shotFrac(id);
+  RW.layout(); RZ.reset(); RW.paint();
+  if (RW.tall) RZ.fill(RW.frac);
+  RW.from = RW.fromRect(RW.tall ? null : src);
   if (src) src.style.visibility = 'hidden';
   RW.p = 0; RW.render();
   RW.anim(1, vx, function(){ if (S.top && S.top.dataset.card === id && !S.sx) { S.x = 0; S.render(); } });
@@ -707,7 +893,8 @@ RW.cancel = function(){
   persist(id, true); RW.busy = true;
   if (S.top && S.top.dataset.card === id) { S.x = 0; S.render(); RW.src = frameOf(S.top); }
   else if (!S.top) { var th = $('[data-edit="' + id + '"] img'); if (th) RW.src = th; }
-  var cur = RW.p; RW.from = RW.fromRect(RW.src); RW.render();
+  if (!RW.tall) RZ.reset();
+  var cur = RW.p; RW.from = RW.fromRect(RW.tall ? null : RW.src); RW.render();
   RW.p = cur; RW.anim(0, 0, function(){ RW.close(); var b = S.top ? $('#dock [data-act="fix"]') : $('[data-edit="' + id + '"]'); if (b && wide()) b.focus({preventScroll:true}); });
 };
 RW.send = function(){
@@ -716,6 +903,7 @@ RW.send = function(){
   if (RW.typing) { RW.typing = false; rwTa.blur(); rw.classList.remove('typing'); rwText.hidden = true; }
   RW.d.s = 'fix'; RW.commit(); persist(id, true); RW.busy = true;
   if (RW.src) { RW.src.style.visibility = ''; RW.src = null; }
+  if (!RW.tall) RZ.reset();
   S.build(nextUndecided(id));
   toast(id, snap, 'fix');
   if (RW.sp) { RW.sp.stop(); RW.sp = null; }
@@ -747,7 +935,7 @@ RW.more = function(){ shBody.parentNode.classList.toggle('more', shBody.scrollHe
 RW.select = function(k){ RW.t = k; RW.paint(); };
 RW.addPin = function(e){
   if (!RW.on || RW.typing || RW.busy) return;
-  var r = rwFrame.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+  var r = rwZoom.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
   if (x < -.02 || x > 1.02 || y < -.02 || y > 1.02) return;
   var hit = -1, best = 24;
   RW.d.pins.forEach(function(p, k){ var dd = Math.hypot((p.x - x) * r.width, (p.y - y) * r.height); if (dd < best) { best = dd; hit = k; } });
@@ -787,6 +975,67 @@ RW.closeText = function(quiet){
 };
 rwTa.addEventListener('input', function(){ if (!RW.on) return; if (RW.t < 0) RW.d.c = rwTa.value; else if (RW.d.pins[RW.t]) RW.d.pins[RW.t].t = rwTa.value; RW.commit(); });
 rwFrame.addEventListener('click', function(e){ RW.addPin(e); });
+var COARSE = window.matchMedia && matchMedia('(pointer: coarse)').matches;
+$('#rwHint').textContent = COARSE ? 'Нажатие ставит точку, щипок увеличивает' : 'Нажатие ставит точку, колесо мыши увеличивает';
+var RZ = Zoom({box:rwFit, frame:rwFrame, layer:rwZoom,
+  active:function(){ return RW.on && !RW.busy && !RW.typing; },
+  onChange:function(z){ var on = z.s > 1.001; $('#rwUnzoom').hidden = !on; $('#rwHint').hidden = on; }});
+
+/* ---------- просмотр скриншота на весь экран ---------- */
+var vw = $('#vw'), vwBg = $('#vwBg'), vwFit = $('#vwFit'), vwFrame = $('#vwFrame'), vwTop = $('#vwTop'), vwBar = $('#vwBar');
+var V = {on:false, id:null, ret:null, tall:false, sp:null};
+V.pad = function(){ return Math.max(vwTop.offsetHeight, vw.clientHeight - vwBar.offsetTop) + 8; };
+var VZ = Zoom({box:vwFit, frame:vwFrame, layer:$('#vwZoom'),
+  active:function(){ return V.on && !V.sp; },
+  inset:function(){ return {t:vwTop.offsetHeight, b:vw.clientHeight - vwBar.offsetTop + 8}; },
+  dbl:function(){ var G = VZ.geo(); return Math.max(2, G.bw / G.fw, G.bh / G.fh); },
+  onChange:function(z){ $('#vwOut').disabled = $('#vwFitB').disabled = z.s <= 1.001; $('#vwIn').disabled = z.s >= VZ.max - .01; },
+  onPull:function(dy){ V.pull(dy); },
+  onPullEnd:function(dy, v){
+    if (Math.abs(dy) > 110 || Math.abs(v) > 900) { V.dismiss(dy, v); return; }
+    V.sp = spring({from:dy, to:0, velocity:v / 1000, response:.32, damping:1, eps:.5, onUpdate:V.pull, onDone:function(){ V.sp = null; V.pull(0); }});
+  }});
+V.pull = function(dy){
+  vwFrame.style.transform = dy ? 'translate3d(0,' + dy + 'px,0)' : '';
+  var k = 1 - Math.min(Math.abs(dy) / 360, .75);
+  vwBg.style.opacity = vwTop.style.opacity = vwBar.style.opacity = dy ? k : '';
+};
+V.dismiss = function(dy, v){
+  var to = (dy < 0 ? -1 : 1) * innerHeight;
+  if (RM) { V.close(); return; }
+  V.sp = spring({from:dy, to:to, velocity:v / 1000, response:.3, damping:1, eps:4, onUpdate:V.pull, onDone:function(){ V.sp = null; V.close(); }});
+};
+V.layout = function(){
+  var it = byId[V.id]; if (!it) return;
+  var bw = vwFit.clientWidth, bh = vwFit.clientHeight, pad = V.pad(), aw = bw - 32, ah = bh - 2 * pad;
+  var s = Math.min(aw / it.w, ah / it.h), fw = Math.max(10, Math.floor(it.w * s)), fh = Math.max(10, Math.floor(it.h * s));
+  V.tall = fw < aw * .45;
+  vwFrame.style.width = fw + 'px'; vwFrame.style.height = fh + 'px';
+  vwFrame.style.left = Math.round((bw - fw) / 2) + 'px'; vwFrame.style.top = Math.round((bh - fh) / 2) + 'px';
+  VZ.max = clamp(2 * it.w / fw, 3, 10); VZ.refit();
+};
+V.open = function(id){
+  var it = byId[id]; if (!it || V.on || RW.on) return;
+  V.on = true; V.id = id; V.ret = document.activeElement;
+  hideToast(); closeMenu();
+  document.documentElement.classList.add('lock');
+  BG.forEach(function(e){ e.inert = true; });
+  vw.hidden = false; V.pull(0);
+  $('#vwImg').src = it.src; $('#vwImg').alt = 'Макет «' + it.title + '»';
+  $('#vwPins').innerHTML = pinsHTML(D(id), -1);
+  $('#vwCode').textContent = it.code; $('#vwTitle').textContent = it.title;
+  V.layout(); VZ.reset();
+  if (V.tall) VZ.fill(shotFrac(id));
+  $('#vwClose').focus({preventScroll:true});
+};
+V.close = function(){
+  if (!V.on) return;
+  if (V.sp) { V.sp.stop(); V.sp = null; }
+  V.on = false; vw.hidden = true; V.pull(0); VZ.reset();
+  document.documentElement.classList.remove('lock');
+  BG.forEach(function(e){ e.inert = false; });
+  if (V.ret && V.ret.focus && document.contains(V.ret)) V.ret.focus({preventScroll:true});
+};
 shBody.addEventListener('scroll', RW.more, {passive:true});
 
 /* ---------- видимая область (дополнительно, раскладка от этого не зависит) ---------- */
@@ -800,6 +1049,7 @@ if (window.visualViewport) { visualViewport.addEventListener('resize', onVV); vi
 var rT = 0;
 window.addEventListener('resize', function(){
   onVV(); if (RW.on) { RW.layout(); RW.render(); RW.more(); if (RW.typing) RW.crop(); }
+  if (V.on) V.layout();
   clearTimeout(rT); rT = setTimeout(function(){ if (!RW.on && !S.flying && !S.drag && S.top) S.build(st.cur); }, 150);
 });
 
@@ -812,6 +1062,12 @@ document.addEventListener('click', function(e){
   if ((b = t.closest('[data-act]'))) { act(b.dataset.act); return; }
   if ((b = t.closest('[data-nav]'))) { S.nav(+b.dataset.nav); return; }
   if ((b = t.closest('[data-edit]'))) { RW.open(b.dataset.edit, 0, b.querySelector('img')); return; }
+  if ((b = t.closest('[data-vw]'))) { var a = b.dataset.vw; if (a === 'close') V.close(); else if (a === 'in') VZ.by(1.6); else if (a === 'out') VZ.by(1 / 1.6); else VZ.out(); return; }
+  if ((b = t.closest('#rwUnzoom'))) { RZ.out(); return; }
+  if (S.top && S.top.contains(t) && !RW.on && !V.on) {
+    if (t.closest('[data-zoom]') || t.closest('.card-shot')) { V.open(st.cur); return; }
+    if (t.closest('[data-more]') && S.top.classList.contains('has-more')) { toggleInfo(S.top); return; }
+  }
   if ((b = t.closest('[data-copy]'))) { closeMenu(); copyDecisions(); return; }
   if ((b = t.closest('#download,[data-download]'))) { closeMenu(); downloadDecisions(); return; }
   if ((b = t.closest('#reset'))) {
@@ -832,6 +1088,13 @@ document.addEventListener('click', function(e){
 document.addEventListener('keydown', function(e){
   var m = $('#menu');
   if (!m.hidden && e.key === 'Escape') { e.preventDefault(); closeMenu(); $('#moreBtn').focus(); return; }
+  if (V.on) {
+    if (e.key === 'Escape') { e.preventDefault(); V.close(); }
+    else if (e.key === '+' || e.key === '=') { e.preventDefault(); VZ.by(1.6); }
+    else if (e.key === '-') { e.preventDefault(); VZ.by(1 / 1.6); }
+    else if (e.key === '0') { e.preventDefault(); VZ.out(); }
+    return;
+  }
   if (RW.on) {
     if (e.key === 'Escape') { e.preventDefault(); if (RW.typing) RW.closeText(); else RW.cancel(); return; }
     if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); RW.send(); return; }

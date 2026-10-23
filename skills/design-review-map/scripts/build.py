@@ -23,6 +23,7 @@ TAGS = ['Отступы', 'Цвета', 'Шрифты', 'Тексты', 'Ико�
 MIME = {'.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif',
         '.webp': 'image/webp', '.svg': 'image/svg+xml', '.avif': 'image/avif'}
 WARN_MB, MAX_MB = 8, 15
+NOTE_MAX, TITLE_MAX = 140, 40  # больше — на телефоне не влезет в карточку, уйдёт под «Ещё»
 
 
 def arg(name, default=''):
@@ -126,6 +127,9 @@ def main():
             files_map[src] = os.path.abspath(os.path.join(img_dir, name))
             total += len(raw)
         note = sc.get('note', '')
+        if len(note) > NOTE_MAX or len(sc['title']) > TITLE_MAX:
+            print(f'предупреждение: у {code} ' + ('описание длиннее %d знаков' % NOTE_MAX if len(note) > NOTE_MAX else 'название длиннее %d знаков' % TITLE_MAX)
+                  + ', на карточке видна только часть, остальное под «Ещё». Лучше сократить', file=sys.stderr)
         screens.append(dict(id=sid, code=code, title=sc['title'], note=note, image=sc['image'], w=size[0], h=size[1]))
         data_screens.append(dict(id=sid, code=code, title=sc['title'], note=note, src=src, w=size[0], h=size[1]))
 
@@ -135,7 +139,7 @@ def main():
                  'Сожмите их в WebP или JPEG либо соберите с --images copy')
     if mb > WARN_MB:
         print(f'предупреждение: скриншоты весят {mb:.1f} МБ, на телефоне страница будет открываться долго. '
-              'Лучше WebP или JPEG шириной до 1200 px', file=sys.stderr)
+              'Лучше WebP или JPEG с качеством 80–85, разрешение не уменьшать: скриншоты увеличивают', file=sys.stderr)
 
     data = dict(key=key, title=S['title'], phrases=phrases, tags=tags, screens=data_screens)
     t = open(tpl_path, encoding='utf-8').read()
