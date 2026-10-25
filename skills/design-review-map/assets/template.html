@@ -136,7 +136,8 @@ button{font:inherit;color:inherit}
 .card.under>.card-shot,.card.under>.card-info{opacity:calc(.5 + .5 * var(--d, 0))}
 .card-shot{flex:1;min-height:0;margin:10px 10px 0;border-radius:var(--r-in);background:var(--shot-bg);display:flex;align-items:center;justify-content:center;position:relative;cursor:zoom-in}
 /* длинный скриншот: по ширине карточки, листается внутри */
-.card-shot.tall{display:block;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
+.card-shot{touch-action:none}
+.card-shot.tall{touch-action:pan-y;display:block;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin}
 .card-shot.tall .frame{margin:12px auto 40px}
 .card-shot.tall::after{content:'';position:sticky;display:block;bottom:0;height:40px;margin-top:-40px;background:linear-gradient(to bottom, transparent, var(--shot-bg));pointer-events:none}
 .zoom-btn{appearance:none;border:0;position:absolute;top:20px;right:20px;z-index:2;width:44px;height:44px;border-radius:var(--r-pill);cursor:pointer;
@@ -273,6 +274,7 @@ body.is-done .dock{display:none}
 .vw{position:fixed;z-index:60;inset:0;height:100vh;height:100dvh;overflow:hidden;overscroll-behavior:none}
 .vw[hidden]{display:none}
 .vw:not([hidden]){animation:vwIn .2s var(--ease)}
+.vw.lift{animation:none}
 @keyframes vwIn{from{opacity:0}to{opacity:1}}
 .vw-bg{position:absolute;inset:0;background:var(--bg)}
 .vw-fit{position:absolute;inset:0;touch-action:none;cursor:grab}
@@ -538,6 +540,19 @@ function Zoom(o){
     var k = e.ctrlKey ? .01 : e.deltaMode === 1 ? .05 : .0025;
     at(z.s * Math.exp(-e.deltaY * k), anchor(e.clientX, e.clientY));
   }, {passive:false});
+  /* состояние снаружи, без ограничений (подъём скриншота щипком с карточки, масштаб может быть меньше 1) */
+  function draw(){ o.layer.style.transform = 'translate(' + z.x + 'px,' + z.y + 'px) scale(' + z.s + ')'; o.layer.style.setProperty('--pz', String(1 / z.s)); }
+  z.raw = function(s, x, y){ stop(); busy(); z.s = s; z.x = x; z.y = y; draw(); };
+  /* вернуть в допустимое: масштаб от 1 до max, без пустых полей; точка cx, cy остаётся под пальцами */
+  z.settle = function(cx, cy){
+    stop(); var f = {s:z.s, x:z.x, y:z.y};
+    at(clamp(z.s, 1, z.max), anchor(cx, cy)); var t = {s:z.s, x:z.x, y:z.y};
+    if (RM) return;
+    z.s = f.s; z.x = f.x; z.y = f.y; draw();
+    sp = spring({from:0, to:1, response:.36, damping:1, eps:.002,
+      onUpdate:function(q){ busy(); z.s = f.s + (t.s - f.s) * q; z.x = f.x + (t.x - f.x) * q; z.y = f.y + (t.y - f.y) * q; draw(); },
+      onDone:function(){ sp = null; z.s = t.s; z.x = t.x; z.y = t.y; apply(); }});
+  };
   return z;
 }
 function swallowClick(){ var f = function(ev){ ev.stopPropagation(); ev.preventDefault(); }; window.addEventListener('click', f, true); setTimeout(function(){ window.removeEventListener('click', f, true); }, 0); }
@@ -591,7 +606,7 @@ function copyText(){
 
 /* ---------- стопка ---------- */
 var deck = $('#deck'), doneW = $('#doneW');
-var S = {top:null, under:null, x:0, sx:null, su:null, drag:null, flying:false};
+var S = {top:null, under:null, x:0, sx:null, su:null, drag:null, flying:false, pts:{}};
 function pinsHTML(d, active, pop){ return d.pins.map(function(p, k){ return '<span class="pin' + (k === active ? ' on' : '') + (k === pop ? ' pop' : '') + '" style="left:' + (p.x * 100) + '%;top:' + (p.y * 100) + '%">' + (k + 1) + '</span>'; }).join(''); }
 function badge(s){ return s === 'ok' ? '<span class="badge b-ok">Принято</span>' : s === 'fix' ? '<span class="badge b-fix">На доработку</span>' : ''; }
 function cardSize(it){ var W = deck.clientWidth, H = deck.clientHeight; return {w:Math.round(it.w > it.h ? Math.min(W, 900) : Math.min(W, 440)), h:Math.round(Math.max(240, H - PEEK))}; }
@@ -678,11 +693,19 @@ function frameOf(card){ return card ? card.querySelector('.frame') : null; }
 
 /* перетаскивание карточки */
 document.addEventListener('pointerdown', function(e){
-  var t = S.top; if (!t || !t.contains(e.target) || e.button > 0 || S.flying || RW.on) return;
+  var t = S.top; if (!t || !t.contains(e.target) || e.button > 0 || S.flying || RW.on || V.on) return;
+  if (e.pointerType !== 'mouse') {
+    if (e.isPrimary) S.pts = {};
+    S.pts[e.pointerId] = {x:e.clientX, y:e.clientY};
+    var ids = Object.keys(S.pts);
+    if (ids.length === 2) { L.start(ids); return; }
+    if (ids.length > 2) return;
+  }
   if (S.sx) { S.sx.stop(); S.sx = null; }
   S.drag = {id:e.pointerId, sx:e.clientX, sy:e.clientY, x0:e.clientX - S.x, moved:false, hist:[]}; hist(S.drag, e);
 });
 document.addEventListener('pointermove', function(e){
+  if (S.pts[e.pointerId]) { S.pts[e.pointerId] = {x:e.clientX, y:e.clientY}; if (L.on) { L.move(); return; } }
   var d = S.drag; if (!d || e.pointerId !== d.id || !S.top) return;
   var dx = e.clientX - d.sx, dy = e.clientY - d.sy;
   if (!d.moved) {
@@ -694,6 +717,7 @@ document.addEventListener('pointermove', function(e){
   S.x = e.clientX - d.x0; hist(d, e); S.render();
 });
 function sEnd(e){
+  if (S.pts[e.pointerId]) { delete S.pts[e.pointerId]; if (L.on) { L.end(); return; } }
   var d = S.drag; if (!d || e.pointerId !== d.id) return;
   S.drag = null;
   if (!d.moved) { if (S.x) S.settle(0); return; }
@@ -944,27 +968,77 @@ V.layout = function(){
   vwFrame.style.left = Math.round((bw - fw) / 2) + 'px'; vwFrame.style.top = Math.round((bh - fh) / 2) + 'px';
   VZ.max = clamp(2 * it.w / fw, 3, 10); VZ.refit();
 };
-V.open = function(id){
+V.open = function(id, lift){
   var it = byId[id]; if (!it || V.on || RW.on) return;
   V.on = true; V.id = id; V.ret = document.activeElement;
   hideToast(); closeMenu();
   document.documentElement.classList.add('lock');
-  BG.forEach(function(e){ e.inert = true; });
+  /* при щипке фон становится неактивным, только когда просмотр остался: пальцы ещё на карточке */
+  if (!lift) BG.forEach(function(e){ e.inert = true; });
+  vw.classList.toggle('lift', !!lift);
   vw.hidden = false; V.pull(0);
   $('#vwImg').src = it.src; $('#vwImg').alt = 'Макет «' + it.title + '»';
   $('#vwPins').innerHTML = pinsHTML(D(id), -1);
   $('#vwCode').textContent = it.code; $('#vwTitle').textContent = it.title;
   V.layout(); VZ.reset();
-  if (V.tall) VZ.fill(shotFrac(id));
+  if (V.tall && !lift) VZ.fill(shotFrac(id));
   $('#vwClose').focus({preventScroll:true});
 };
 V.close = function(){
   if (!V.on) return;
   if (V.sp) { V.sp.stop(); V.sp = null; }
+  if (L.sp) { L.sp.stop(); L.sp = null; }
+  L.on = false; vwFit.style.clipPath = ''; vw.classList.remove('lift');
+  if (L.fr) { L.fr.style.visibility = ''; L.fr = null; }
   V.on = false; vw.hidden = true; V.pull(0); VZ.reset();
   document.documentElement.classList.remove('lock');
   BG.forEach(function(e){ e.inert = false; });
   if (V.ret && V.ret.focus && document.contains(V.ret)) V.ret.focus({preventScroll:true});
+};
+
+/* ---------- щипок по карточке: скриншот поднимается в просмотр и растёт под пальцами ----------
+   Окно просмотра растёт из скриншота карточки вместе с фоном. Отпустили увеличенным — просмотр остаётся,
+   его можно двигать и увеличивать дальше. Свели пальцы или почти не развели — скриншот возвращается в карточку. */
+var L = {on:false, sp:null, fr:null};
+L.state = function(m, k){ var W = L.R.width * k, H = L.R.height * k; return {s:W / L.F.width, x:m.x - L.u * W - L.F.left, y:m.y - L.v * H - L.F.top}; };
+L.alpha = function(al){
+  var C = L.C, q = 1 - al, bw = vw.clientWidth, bh = vw.clientHeight;
+  vwBg.style.opacity = al; vwTop.style.opacity = vwBar.style.opacity = clamp((al - .6) / .4, 0, 1);
+  vwFit.style.clipPath = al >= .999 ? '' : 'inset(' + (C.top * q) + 'px ' + ((bw - C.right) * q) + 'px ' + ((bh - C.bottom) * q) + 'px ' + (C.left * q) + 'px round ' + (12 * q) + 'px)';
+};
+L.paint = function(st, al){ VZ.raw(st.s, st.x, st.y); L.alpha(al); };
+L.pts = function(){ var a = S.pts[L.ids[0]], b = S.pts[L.ids[1]]; return a && b ? {m:{x:(a.x + b.x) / 2, y:(a.y + b.y) / 2}, d:Math.hypot(a.x - b.x, a.y - b.y)} : null; };
+L.start = function(ids){
+  var c = S.top, fr = frameOf(c); if (!fr) return;
+  S.drag = null; c.classList.remove('dragging'); S.stop(); if (S.x) { S.x = 0; S.render(); }
+  L.ids = ids; var g = L.pts();
+  L.R = fr.getBoundingClientRect(); L.C = c.querySelector('.card-shot').getBoundingClientRect();
+  V.open(st.cur, true); if (!V.on) return;
+  vwFrame.style.transform = ''; L.F = vwFrame.getBoundingClientRect();
+  L.u = (g.m.x - L.R.left) / L.R.width; L.v = (g.m.y - L.R.top) / L.R.height; L.d0 = Math.max(1, g.d);
+  L.k = 1; L.m = g.m; L.on = true; L.fr = fr; fr.style.visibility = 'hidden';
+  L.paint(L.state(g.m, 1), 0);
+};
+L.move = function(){ var g = L.pts(); if (!g) return; L.m = g.m; L.k = Math.max(.6, g.d / L.d0); L.paint(L.state(g.m, L.k), clamp((L.k - 1) / .6, 0, 1)); };
+L.end = function(){
+  if (!L.on) return;
+  L.on = false; swallowClick();
+  var al0 = clamp((L.k - 1) / .6, 0, 1);
+  if (L.k < 1.12) {
+    /* обратно в карточку */
+    var f = {s:VZ.s, x:VZ.x, y:VZ.y}, t = {s:L.R.width / L.F.width, x:L.R.left - L.F.left, y:L.R.top - L.F.top};
+    if (RM) { V.close(); return; }
+    L.sp = spring({from:0, to:1, response:.3, damping:1, eps:.004,
+      onUpdate:function(q){ L.paint({s:f.s + (t.s - f.s) * q, x:f.x + (t.x - f.x) * q, y:f.y + (t.y - f.y) * q}, al0 * (1 - q)); },
+      onDone:function(){ L.sp = null; V.close(); }});
+    return;
+  }
+  /* остаётся просмотр: фон до конца, масштаб и края — в допустимые */
+  BG.forEach(function(e){ e.inert = true; });
+  VZ.settle(L.m.x, L.m.y);
+  function done(){ L.sp = null; V.pull(0); vwFit.style.clipPath = ''; vw.classList.remove('lift'); }
+  if (RM || al0 >= .999) { done(); return; }
+  L.sp = spring({from:al0, to:1, response:.3, damping:1, eps:.004, onUpdate:L.alpha, onDone:done});
 };
 
 /* ---------- видимая область (дополнительно, раскладка от этого не зависит) ---------- */
