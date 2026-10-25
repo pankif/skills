@@ -540,19 +540,9 @@ function Zoom(o){
     var k = e.ctrlKey ? .01 : e.deltaMode === 1 ? .05 : .0025;
     at(z.s * Math.exp(-e.deltaY * k), anchor(e.clientX, e.clientY));
   }, {passive:false});
-  /* состояние снаружи, без ограничений (подъём скриншота щипком с карточки, масштаб может быть меньше 1) */
+  /* состояние снаружи, без ограничений (щипок по карточке, масштаб может быть меньше 1) */
   function draw(){ o.layer.style.transform = 'translate(' + z.x + 'px,' + z.y + 'px) scale(' + z.s + ')'; o.layer.style.setProperty('--pz', String(1 / z.s)); }
   z.raw = function(s, x, y){ stop(); busy(); z.s = s; z.x = x; z.y = y; draw(); };
-  /* вернуть в допустимое: масштаб от 1 до max, без пустых полей; точка cx, cy остаётся под пальцами */
-  z.settle = function(cx, cy){
-    stop(); var f = {s:z.s, x:z.x, y:z.y};
-    at(clamp(z.s, 1, z.max), anchor(cx, cy)); var t = {s:z.s, x:z.x, y:z.y};
-    if (RM) return;
-    z.s = f.s; z.x = f.x; z.y = f.y; draw();
-    sp = spring({from:0, to:1, response:.36, damping:1, eps:.002,
-      onUpdate:function(q){ busy(); z.s = f.s + (t.s - f.s) * q; z.x = f.x + (t.x - f.x) * q; z.y = f.y + (t.y - f.y) * q; draw(); },
-      onDone:function(){ sp = null; z.s = t.s; z.x = t.x; z.y = t.y; apply(); }});
-  };
   return z;
 }
 function swallowClick(){ var f = function(ev){ ev.stopPropagation(); ev.preventDefault(); }; window.addEventListener('click', f, true); setTimeout(function(){ window.removeEventListener('click', f, true); }, 0); }
@@ -973,7 +963,7 @@ V.open = function(id, lift){
   V.on = true; V.id = id; V.ret = document.activeElement;
   hideToast(); closeMenu();
   document.documentElement.classList.add('lock');
-  /* при щипке фон становится неактивным, только когда просмотр остался: пальцы ещё на карточке */
+  /* при щипке по карточке просмотр временный, пальцы ещё на карточке: фон не трогаем */
   if (!lift) BG.forEach(function(e){ e.inert = true; });
   vw.classList.toggle('lift', !!lift);
   vw.hidden = false; V.pull(0);
@@ -982,7 +972,7 @@ V.open = function(id, lift){
   $('#vwCode').textContent = it.code; $('#vwTitle').textContent = it.title;
   V.layout(); VZ.reset();
   if (V.tall && !lift) VZ.fill(shotFrac(id));
-  $('#vwClose').focus({preventScroll:true});
+  if (!lift) $('#vwClose').focus({preventScroll:true});
 };
 V.close = function(){
   if (!V.on) return;
@@ -996,14 +986,14 @@ V.close = function(){
   if (V.ret && V.ret.focus && document.contains(V.ret)) V.ret.focus({preventScroll:true});
 };
 
-/* ---------- щипок по карточке: скриншот поднимается в просмотр и растёт под пальцами ----------
-   Окно просмотра растёт из скриншота карточки вместе с фоном. Отпустили увеличенным — просмотр остаётся,
-   его можно двигать и увеличивать дальше. Свели пальцы или почти не развели — скриншот возвращается в карточку. */
+/* ---------- щипок по карточке: скриншот поднимается над экраном и растёт под пальцами ----------
+   Окно растёт из скриншота карточки вместе с фоном. Отпустили пальцы — скриншот возвращается в карточку,
+   как в ленте Instagram. Чтобы рассматривать дольше, есть просмотр по нажатию на скриншот или лупу. */
 var L = {on:false, sp:null, fr:null};
 L.state = function(m, k){ var W = L.R.width * k, H = L.R.height * k; return {s:W / L.F.width, x:m.x - L.u * W - L.F.left, y:m.y - L.v * H - L.F.top}; };
 L.alpha = function(al){
   var C = L.C, q = 1 - al, bw = vw.clientWidth, bh = vw.clientHeight;
-  vwBg.style.opacity = al; vwTop.style.opacity = vwBar.style.opacity = clamp((al - .6) / .4, 0, 1);
+  vwBg.style.opacity = al; vwTop.style.opacity = vwBar.style.opacity = 0;
   vwFit.style.clipPath = al >= .999 ? '' : 'inset(' + (C.top * q) + 'px ' + ((bw - C.right) * q) + 'px ' + ((bh - C.bottom) * q) + 'px ' + (C.left * q) + 'px round ' + (12 * q) + 'px)';
 };
 L.paint = function(st, al){ VZ.raw(st.s, st.x, st.y); L.alpha(al); };
@@ -1023,22 +1013,11 @@ L.move = function(){ var g = L.pts(); if (!g) return; L.m = g.m; L.k = Math.max(
 L.end = function(){
   if (!L.on) return;
   L.on = false; swallowClick();
-  var al0 = clamp((L.k - 1) / .6, 0, 1);
-  if (L.k < 1.12) {
-    /* обратно в карточку */
-    var f = {s:VZ.s, x:VZ.x, y:VZ.y}, t = {s:L.R.width / L.F.width, x:L.R.left - L.F.left, y:L.R.top - L.F.top};
-    if (RM) { V.close(); return; }
-    L.sp = spring({from:0, to:1, response:.3, damping:1, eps:.004,
-      onUpdate:function(q){ L.paint({s:f.s + (t.s - f.s) * q, x:f.x + (t.x - f.x) * q, y:f.y + (t.y - f.y) * q}, al0 * (1 - q)); },
-      onDone:function(){ L.sp = null; V.close(); }});
-    return;
-  }
-  /* остаётся просмотр: фон до конца, масштаб и края — в допустимые */
-  BG.forEach(function(e){ e.inert = true; });
-  VZ.settle(L.m.x, L.m.y);
-  function done(){ L.sp = null; V.pull(0); vwFit.style.clipPath = ''; vw.classList.remove('lift'); }
-  if (RM || al0 >= .999) { done(); return; }
-  L.sp = spring({from:al0, to:1, response:.3, damping:1, eps:.004, onUpdate:L.alpha, onDone:done});
+  var al0 = clamp((L.k - 1) / .6, 0, 1), f = {s:VZ.s, x:VZ.x, y:VZ.y}, t = {s:L.R.width / L.F.width, x:L.R.left - L.F.left, y:L.R.top - L.F.top};
+  if (RM) { V.close(); return; }
+  L.sp = spring({from:0, to:1, response:.32, damping:1, eps:.004,
+    onUpdate:function(q){ L.paint({s:f.s + (t.s - f.s) * q, x:f.x + (t.x - f.x) * q, y:f.y + (t.y - f.y) * q}, al0 * (1 - q)); },
+    onDone:function(){ L.sp = null; V.close(); }});
 };
 
 /* ---------- видимая область (дополнительно, раскладка от этого не зависит) ---------- */
