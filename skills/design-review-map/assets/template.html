@@ -1004,11 +1004,17 @@ L.start = function(ids){
   L.ids = ids; var g = L.pts();
   L.R = fr.getBoundingClientRect(); L.C = c.querySelector('.card-shot').getBoundingClientRect();
   V.open(st.cur, true); if (!V.on) return;
-  vwFrame.style.transform = ''; L.F = vwFrame.getBoundingClientRect();
+  /* слой ровно на месте и в размере скриншота карточки: масштаб от 1, без огромного слоя у длинных скриншотов */
+  var b = vwFit.getBoundingClientRect(), fs = vwFrame.style;
+  fs.transform = ''; fs.left = (L.R.left - b.left) + 'px'; fs.top = (L.R.top - b.top) + 'px'; fs.width = L.R.width + 'px'; fs.height = L.R.height + 'px';
+  L.F = L.R;
   L.u = (g.m.x - L.R.left) / L.R.width; L.v = (g.m.y - L.R.top) / L.R.height; L.d0 = Math.max(1, g.d);
   L.k = 1; L.m = g.m; L.on = true; L.fr = fr; fr.style.visibility = 'hidden';
   L.paint(L.state(g.m, 1), 0);
 };
+/* два пальца на карточке — это щипок: браузер не прокручивает под ним длинный скриншот */
+deck.addEventListener('touchstart', function(e){ if (e.touches.length > 1 && S.top && S.top.contains(e.target)) e.preventDefault(); }, {passive:false});
+deck.addEventListener('touchmove', function(e){ if (e.touches.length > 1) e.preventDefault(); }, {passive:false});
 L.move = function(){ var g = L.pts(); if (!g) return; L.m = g.m; L.k = Math.max(.6, g.d / L.d0); L.paint(L.state(g.m, L.k), clamp((L.k - 1) / .6, 0, 1)); };
 L.end = function(){
   if (!L.on) return;
